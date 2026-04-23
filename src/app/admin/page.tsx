@@ -2,21 +2,30 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
-const ADMIN_PASSWORD = 'lapsoft2024'
-
 export default function AdminLoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState(false)
+  const [loading, setLoading] = useState(false)
   const router = useRouter()
 
-  function handleLogin(e: React.FormEvent) {
+  async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
-    if (password === ADMIN_PASSWORD) {
+    setLoading(true)
+    setError(false)
+
+    const res = await fetch('/api/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password }),
+    })
+
+    if (res.ok) {
       sessionStorage.setItem('lapsoft-admin', '1')
       router.push('/admin/dashboard')
     } else {
       setError(true)
       setPassword('')
+      setLoading(false)
     }
   }
 
@@ -45,15 +54,12 @@ export default function AdminLoginPage() {
           {error && <p className="text-red-400 text-sm mb-3">Nieprawidłowe hasło</p>}
           <button
             type="submit"
-            className="w-full bg-green-600 text-white font-bold py-3 hover:bg-green-700 transition-colors"
+            disabled={loading}
+            className="w-full bg-green-600 text-white font-bold py-3 hover:bg-green-700 transition-colors disabled:opacity-60"
           >
-            Zaloguj się
+            {loading ? 'Sprawdzam...' : 'Zaloguj się'}
           </button>
         </form>
-
-        <p className="text-center text-xs text-gray-700 mt-5">
-          Hasło: <code className="text-gray-500">lapsoft2024</code>
-        </p>
       </div>
     </div>
   )
