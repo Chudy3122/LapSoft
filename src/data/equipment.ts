@@ -96,23 +96,6 @@ export const equipment: Equipment[] = [
     ],
   },
   {
-    id: 'dell-optiplex-7010',
-    category: 'pc',
-    brand: 'Dell',
-    model: 'OptiPlex 7010',
-    image: '/images/sprzet/dell-optiplex-7010.png',
-    units: 5,
-    description: 'Niezawodny komputer stacjonarny klasy biznesowej. Cichy, energooszczędny, gotowy do pracy od pierwszego uruchomienia.',
-    specs: [
-      { label: 'Procesor', value: 'Intel Core i5 13. generacji' },
-      { label: 'RAM', value: '16 GB DDR4' },
-      { label: 'Dysk', value: '512 GB SSD' },
-      { label: 'Obudowa', value: 'Mini (SFF)' },
-      { label: 'System', value: 'Windows 11 Pro' },
-      { label: 'Porty', value: 'USB-A x4, USB-C, HDMI, DP' },
-    ],
-  },
-  {
     id: 'xiaomi-a27i',
     category: 'monitor',
     brand: 'Xiaomi',
