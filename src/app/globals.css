@@ -1,0 +1,114 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f6f8f5;
+  --foreground: #13201a;
+  --surface: #ffffff;
+  --surface-muted: #edf3ef;
+  --brand: #7DB122;
+  --brand-dark: #5f8818;
+  --brand-soft: #eef8dd;
+  --ink: #102018;
+  --muted: #61706a;
+  --line: #dbe5df;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 88px;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: #dff2b8;
+  color: var(--ink);
+}
+
+@layer base {
+  * { box-sizing: border-box; }
+
+  a,
+  button,
+  input,
+  textarea,
+  select {
+    outline-color: var(--brand);
+  }
+
+  button,
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@layer utilities {
+  .hero-electric-lines,
+  .hero-electric-lines::before,
+  .hero-electric-lines::after {
+    position: absolute;
+    left: -18%;
+    right: -18%;
+    height: 2px;
+    content: "";
+    background:
+      linear-gradient(
+        90deg,
+        transparent 0%,
+        transparent 18%,
+        rgba(125, 177, 34, 0.04) 31%,
+        rgba(125, 177, 34, 0.68) 46%,
+        rgba(220, 255, 151, 0.78) 50%,
+        rgba(125, 177, 34, 0.5) 56%,
+        rgba(125, 177, 34, 0.02) 72%,
+        transparent 100%
+      );
+    background-size: 220% 100%;
+    border-radius: 999px;
+    filter: drop-shadow(0 0 8px rgba(125, 177, 34, 0.42));
+    opacity: 0.34;
+    transform: rotate(-7deg);
+    animation: electric-flow 8s linear infinite;
+  }
+
+  .hero-electric-lines {
+    top: 21%;
+  }
+
+  .hero-electric-lines::before {
+    top: 150px;
+    opacity: 0.24;
+    animation-duration: 10s;
+    animation-delay: -3s;
+  }
+
+  .hero-electric-lines::after {
+    top: 315px;
+    opacity: 0.2;
+    animation-duration: 12s;
+    animation-delay: -6s;
+  }
+}
+
+@keyframes electric-flow {
+  0% {
+    background-position: 120% 0;
+  }
+
+  100% {
+    background-position: -120% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-electric-lines,
+  .hero-electric-lines::before,
+  .hero-electric-lines::after {
+    animation: none;
+  }
+}
