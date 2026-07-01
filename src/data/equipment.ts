@@ -4,6 +4,7 @@ export interface Equipment {
   brand: string
   model: string
   image: string
+  cardImage: string
   specs: { label: string; value: string }[]
   units: number
   description: string
@@ -16,7 +17,8 @@ export const equipment: Equipment[] = [
     brand: 'Dell',
     model: 'Vostro 15 3530',
     image: '/images/sprzet/dell-vostro-3530.png',
-    units: 22,
+    cardImage: '/images/sprzet/cards/dell-vostro-3530-card.webp',
+    units: 21,
     description: 'Niezawodny laptop biznesowy idealny do codziennej pracy, nauki i rozrywki. Duży ekran i wygodna klawiatura.',
     specs: [
       { label: 'Procesor', value: 'Intel Core i3/i5 13. generacji' },
@@ -33,7 +35,8 @@ export const equipment: Equipment[] = [
     brand: 'Dell',
     model: 'DC15250',
     image: '/images/sprzet/dell-dc15250.png',
-    units: 6,
+    cardImage: '/images/sprzet/cards/dell-dc15250-card.webp',
+    units: 5,
     description: 'Kompaktowy i lekki laptop do codziennego użytku. Doskonały do przeglądania internetu, poczty i wideorozmów.',
     specs: [
       { label: 'Procesor', value: 'Intel Core i3 13. generacji' },
@@ -50,7 +53,8 @@ export const equipment: Equipment[] = [
     brand: 'Dell',
     model: 'Inspiron 15 3530',
     image: '/images/sprzet/dell-inspiron-3530.png',
-    units: 12,
+    cardImage: '/images/sprzet/cards/dell-inspiron-3530-card.webp',
+    units: 2,
     description: 'Wydajny laptop z większą pamięcią RAM — płynna praca z wieloma aplikacjami naraz. Świetny wybór dla wymagających użytkowników.',
     specs: [
       { label: 'Procesor', value: 'Intel Core i5 13. generacji' },
@@ -67,6 +71,7 @@ export const equipment: Equipment[] = [
     brand: 'Dell',
     model: 'Latitude 3550',
     image: '/images/sprzet/dell-latitude-3550.png',
+    cardImage: '/images/sprzet/cards/dell-latitude-3550-card.webp',
     units: 5,
     description: 'Profesjonalny laptop klasy biznesowej z rozszerzonymi funkcjami bezpieczeństwa. Trwała budowa, długa żywotność baterii.',
     specs: [
@@ -84,6 +89,7 @@ export const equipment: Equipment[] = [
     brand: 'HP',
     model: 'Pro SFF 290 G9',
     image: '/images/sprzet/hp-pro-290-g9.png',
+    cardImage: '/images/sprzet/cards/hp-pro-290-g9-card.webp',
     units: 4,
     description: 'Kompaktowy komputer stacjonarny do biurka — zajmuje mało miejsca, a pracuje wydajnie. Idealny do domu.',
     specs: [
@@ -101,7 +107,8 @@ export const equipment: Equipment[] = [
     brand: 'Xiaomi',
     model: 'A27i',
     image: '/images/sprzet/xiaomi-a27i.png',
-    units: 20,
+    cardImage: '/images/sprzet/cards/xiaomi-a27i-card.webp',
+    units: 32,
     description: 'Duży, czytelny monitor 27 cali — idealna wielkość do wygodnej pracy i oglądania filmów bez zmęczenia oczu.',
     specs: [
       { label: 'Przekątna', value: '27 cali' },

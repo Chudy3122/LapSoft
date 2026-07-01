@@ -9,6 +9,11 @@ const inter = Inter({ subsets: ['latin', 'latin-ext'] })
 export const metadata: Metadata = {
   title: 'LapSoft — Wynajem sprzętu komputerowego',
   description: 'Wynajmij laptop, komputer lub monitor w prostym abonamencie miesięcznym. Dostawa, konfiguracja i wsparcie techniczne w cenie.',
+  icons: {
+    icon: [{ url: '/favicon_lapsoft.png', type: 'image/png', sizes: '200x200' }],
+    shortcut: '/favicon_lapsoft.png',
+    apple: [{ url: '/favicon_lapsoft.png', type: 'image/png', sizes: '200x200' }],
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

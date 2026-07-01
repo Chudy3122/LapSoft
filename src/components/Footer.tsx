@@ -3,7 +3,7 @@ import Link from 'next/link'
 export default function Footer() {
   return (
     <footer className="border-t border-[#102018]/10 bg-[#102018] text-[#f4f9ed]">
-      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-10 px-5 py-12 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
+      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-10 px-5 py-12 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr]">
         <div>
           <div className="mb-4 flex items-center gap-3">
             <span className="flex h-10 w-10 items-center justify-center rounded-md bg-[#6f9f1f] text-lg font-black text-white">
@@ -39,14 +39,6 @@ export default function Footer() {
             <li><a href="tel:+48000000000" className="text-[#f4f9ed]/70 transition-colors hover:text-white">+48 000 000 000</a></li>
             <li><a href="mailto:kontakt@lapsoft.pl" className="text-[#f4f9ed]/70 transition-colors hover:text-white">kontakt@lapsoft.pl</a></li>
             <li className="text-[#f4f9ed]/50">Pon–Pt, 7:00–16:00</li>
-          </ul>
-        </div>
-
-        <div>
-          <h3 className="mb-4 text-sm font-black uppercase tracking-wider text-white">Dokumenty</h3>
-          <ul className="space-y-2 text-sm">
-            <li><Link href="/polityka-prywatnosci" className="text-[#f4f9ed]/70 transition-colors hover:text-white">Polityka prywatności</Link></li>
-            <li><Link href="/regulamin" className="text-[#f4f9ed]/70 transition-colors hover:text-white">Regulamin</Link></li>
           </ul>
         </div>
       </div>

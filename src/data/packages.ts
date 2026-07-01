@@ -35,7 +35,7 @@ export const packages: Package[] = [
     id: 'pc-monitor',
     name: 'PC + Monitor',
     description: 'Stacjonarny zestaw komputerowy — najwydajniejsza opcja do pracy i rozrywki w domu.',
-    includes: ['Komputer HP Pro SFF 290 G9 lub Dell Optiplex 7010', 'Monitor Xiaomi A27i 27"', 'Klawiatura i mysz', 'Kable połączeniowe', 'Konfiguracja i uruchomienie'],
+    includes: ['Komputer HP Pro SFF 290 G9', 'Monitor Xiaomi A27i 27"', 'Klawiatura i mysz', 'Kable połączeniowe', 'Konfiguracja i uruchomienie'],
     prices: { '6': 249, '12': 229, '24': 209 },
     buyoutPrices: { '6': 1500, '12': 1000, '24': 500 },
     icon: '🖥️',

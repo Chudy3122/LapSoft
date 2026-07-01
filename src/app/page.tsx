@@ -221,17 +221,17 @@ export default function HomePage() {
                 key={pkg.id}
                 className={`rounded-lg border p-6 ${
                   pkg.popular
-                    ? 'border-[#7DB122] bg-[#7DB122] text-[#102018]'
+                    ? 'border-[#7DB122] bg-[#6f9f1f] text-white'
                     : 'border-white/10 bg-white/5 text-white'
                 }`}
               >
                 <div className="mb-6 flex items-start justify-between gap-4">
                   <div>
                     {pkg.popular && (
-                      <p className="mb-2 text-xs font-black uppercase tracking-wider">Najczęstszy wybór</p>
+                      <p className="mb-2 text-xs font-black uppercase tracking-wider text-[#eef8dd]">Najczęstszy wybór</p>
                     )}
                     <h3 className="text-2xl font-black tracking-tight">{pkg.name}</h3>
-                    <p className={`mt-2 text-sm leading-6 ${pkg.popular ? 'text-[#102018]/75' : 'text-[#f4f9ed]/65'}`}>
+                    <p className={`mt-2 text-sm leading-6 ${pkg.popular ? 'text-white/80' : 'text-[#f4f9ed]/65'}`}>
                       {pkg.description}
                     </p>
                   </div>
@@ -239,14 +239,14 @@ export default function HomePage() {
 
                 <p className="mb-6 text-5xl font-black tracking-tight">
                   {pkg.prices['24']}
-                  <span className={`text-base font-bold ${pkg.popular ? 'text-[#102018]/65' : 'text-[#f4f9ed]/55'}`}> zł/mies.</span>
+                  <span className={`text-base font-bold ${pkg.popular ? 'text-white/70' : 'text-[#f4f9ed]/55'}`}> zł/mies.</span>
                 </p>
 
                 <ul className="space-y-3 text-sm font-semibold">
                   {pkg.includes.slice(0, 4).map(item => (
                     <li key={item} className="flex gap-2">
-                      <span className={pkg.popular ? 'text-[#102018]' : 'text-[#7DB122]'}>✓</span>
-                      <span className={pkg.popular ? 'text-[#102018]/80' : 'text-[#f4f9ed]/75'}>{item}</span>
+                      <span className={pkg.popular ? 'text-[#eef8dd]' : 'text-[#7DB122]'}>✓</span>
+                      <span className={pkg.popular ? 'text-white/85' : 'text-[#f4f9ed]/75'}>{item}</span>
                     </li>
                   ))}
                 </ul>

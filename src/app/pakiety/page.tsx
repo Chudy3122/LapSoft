@@ -1,16 +1,43 @@
 'use client'
 import { useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
+import { equipment, type Equipment } from '@/data/equipment'
 import { packages, periods, type PeriodKey } from '@/data/packages'
 import { softwareAddons } from '@/data/software'
+
+type EquipmentCategory = Equipment['category']
+
+const equipmentCategoryLabels: Record<EquipmentCategory, string> = {
+  laptop: 'Laptop',
+  pc: 'Komputer PC',
+  monitor: 'Monitor',
+}
+
+const packageEquipmentCategories: Record<string, EquipmentCategory[]> = {
+  laptop: ['laptop'],
+  'laptop-monitor': ['laptop', 'monitor'],
+  'pc-monitor': ['pc', 'monitor'],
+}
+
+const defaultEquipmentByCategory = {
+  laptop: equipment.find(item => item.category === 'laptop')?.id ?? '',
+  pc: equipment.find(item => item.category === 'pc')?.id ?? '',
+  monitor: equipment.find(item => item.category === 'monitor')?.id ?? '',
+}
 
 export default function PakietyPage() {
   const [selectedPackage, setSelectedPackage] = useState(packages[1].id)
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodKey>('12')
   const [selectedAddons, setSelectedAddons] = useState<string[]>([])
+  const [selectedEquipmentByCategory, setSelectedEquipmentByCategory] = useState<Record<EquipmentCategory, string>>(defaultEquipmentByCategory)
   const [withBuyout, setWithBuyout] = useState(false)
 
   const pkg = packages.find(p => p.id === selectedPackage)!
+  const requiredEquipmentCategories = packageEquipmentCategories[selectedPackage] ?? []
+  const selectedEquipmentItems = requiredEquipmentCategories
+    .map(category => equipment.find(item => item.id === selectedEquipmentByCategory[category]))
+    .filter(Boolean) as Equipment[]
   const basePrice = pkg.prices[selectedPeriod]
   const addonsTotal = selectedAddons.reduce((sum, id) => {
     return sum + (softwareAddons.find(a => a.id === id)?.price ?? 0)
@@ -30,6 +57,15 @@ export default function PakietyPage() {
     setSelectedAddons(prev =>
       prev.includes(id) ? prev.filter(a => a !== id) : [...prev, id]
     )
+
+  const contactQuery = new URLSearchParams({
+    package: selectedPackage,
+    period: selectedPeriod,
+  })
+
+  selectedEquipmentItems.forEach(item => {
+    contactQuery.append('equipment', item.id)
+  })
 
   return (
     <div className="bg-[#f6f8f5]">
@@ -105,6 +141,76 @@ export default function PakietyPage() {
 
           <section className="rounded-lg border border-[#102018]/10 bg-white p-5 shadow-sm md:p-6">
             <p className="text-xs font-black uppercase tracking-widest text-[#5f8818]">Krok 2</p>
+            <h2 className="mt-1 text-2xl font-black tracking-tight text-gray-950">Wybierz konkretny sprzęt</h2>
+            <p className="mt-2 text-sm leading-6 text-gray-500">
+              Na razie cena pakietu jest taka sama niezależnie od modelu. Później możemy przypisać osobne ceny do konkretnych urządzeń.
+            </p>
+
+            <div className="mt-5 space-y-5">
+              {requiredEquipmentCategories.map(category => {
+                const categoryEquipment = equipment.filter(item => item.category === category)
+
+                return (
+                  <div key={category}>
+                    <p className="mb-3 text-sm font-black uppercase tracking-widest text-[#5f8818]">
+                      {equipmentCategoryLabels[category]}
+                    </p>
+                    <div className="grid auto-rows-fr grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                      {categoryEquipment.map(item => {
+                        const active = selectedEquipmentByCategory[category] === item.id
+
+                        return (
+                          <button
+                            key={item.id}
+                            type="button"
+                            onClick={() =>
+                              setSelectedEquipmentByCategory(prev => ({
+                                ...prev,
+                                [category]: item.id,
+                              }))
+                            }
+                            className={`flex h-full min-h-[292px] flex-col overflow-hidden rounded-lg border-2 text-left transition-colors ${
+                              active
+                                ? 'border-[#7DB122] bg-[#eef8dd]'
+                                : 'border-gray-200 bg-white hover:border-[#7DB122]/60'
+                            }`}
+                          >
+                            <div className="relative flex h-40 shrink-0 items-center justify-center bg-white">
+                              <Image
+                                src={item.cardImage}
+                                alt={`${item.brand} ${item.model}`}
+                                fill
+                                sizes="(max-width: 640px) 90vw, (max-width: 1280px) 40vw, 220px"
+                                unoptimized
+                                className="object-contain p-5"
+                              />
+                            </div>
+                            <div className="flex min-h-[132px] flex-1 flex-col p-4">
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0">
+                                  <p className="text-xs font-black uppercase tracking-widest text-[#5f8818]">{item.brand}</p>
+                                  <p className="mt-1 text-lg font-black leading-tight tracking-tight text-gray-950">{item.model}</p>
+                                </div>
+                                <span className={`mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 text-xs font-black ${
+                                  active ? 'border-[#6f9f1f] bg-[#6f9f1f] text-white' : 'border-gray-300 text-transparent'
+                                }`}>
+                                  ✓
+                                </span>
+                              </div>
+                              <p className="mt-auto pt-3 text-xs font-bold text-gray-500">{item.units} szt. dostępne</p>
+                            </div>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </section>
+
+          <section className="rounded-lg border border-[#102018]/10 bg-white p-5 shadow-sm md:p-6">
+            <p className="text-xs font-black uppercase tracking-widest text-[#5f8818]">Krok 3</p>
             <h2 className="mt-1 text-2xl font-black tracking-tight text-gray-950">Okres abonamentu</h2>
             <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
               {periods.map(p => {
@@ -132,7 +238,7 @@ export default function PakietyPage() {
           </section>
 
           <section className="rounded-lg border border-[#102018]/10 bg-white p-5 shadow-sm md:p-6">
-            <p className="text-xs font-black uppercase tracking-widest text-[#5f8818]">Krok 3</p>
+            <p className="text-xs font-black uppercase tracking-widest text-[#5f8818]">Krok 4</p>
             <h2 className="mt-1 text-2xl font-black tracking-tight text-gray-950">Oprogramowanie i usługi</h2>
             <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
               {softwareAddons.map(addon => {
@@ -177,7 +283,7 @@ export default function PakietyPage() {
           </section>
 
           <section className="rounded-lg border border-[#102018]/10 bg-white p-5 shadow-sm md:p-6">
-            <p className="text-xs font-black uppercase tracking-widest text-[#5f8818]">Krok 4</p>
+            <p className="text-xs font-black uppercase tracking-widest text-[#5f8818]">Krok 5</p>
             <h2 className="mt-1 text-2xl font-black tracking-tight text-gray-950">Opcja wykupu sprzętu</h2>
             <button
               type="button"
@@ -219,6 +325,17 @@ export default function PakietyPage() {
                 <span>{pkg.name}</span>
                 <span className="font-black text-white">{basePrice} zł</span>
               </div>
+              <div className="rounded-lg border border-white/10 bg-white/[0.04] p-3">
+                <p className="mb-2 text-xs font-black uppercase tracking-widest text-[#dff2b8]">Wybrany sprzęt</p>
+                <div className="space-y-1.5">
+                  {selectedEquipmentItems.map(item => (
+                    <div key={item.id} className="flex justify-between gap-4 text-[#f4f9ed]/70">
+                      <span>{equipmentCategoryLabels[item.category]}</span>
+                      <span className="text-right font-black text-white">{item.brand} {item.model}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
               {selectedAddonItems.map(addon => (
                 <div key={addon.id} className="flex justify-between gap-4 text-[#f4f9ed]/70">
                   <span>{addon.name}</span>
@@ -245,7 +362,7 @@ export default function PakietyPage() {
                 <p className="mt-1 text-xs font-semibold text-[#f4f9ed]/55">Dostawa i konfiguracja w cenie</p>
               </div>
               <Link
-                href={`/kontakt?package=${selectedPackage}&period=${selectedPeriod}`}
+                href={`/kontakt?${contactQuery.toString()}`}
                 className="block rounded-md bg-[#6f9f1f] px-6 py-4 text-center text-base font-black text-white transition-colors hover:bg-[#5f8818]"
               >
                 Zamów ten pakiet

@@ -1,4 +1,5 @@
 'use client'
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
@@ -19,14 +20,16 @@ export default function Navbar() {
   return (
     <nav className="sticky top-0 z-50 border-b border-[#102018]/10 bg-white/90 backdrop-blur-xl">
       <div className="mx-auto flex h-[72px] max-w-6xl items-center justify-between px-5 sm:px-6">
-        <Link href="/" className="flex items-center gap-3" aria-label="LapSoft - strona główna">
-          <span className="flex h-10 w-10 items-center justify-center rounded-md bg-[#6f9f1f] text-lg font-black text-white shadow-sm shadow-[#102018]/15">
-            LS
-          </span>
-          <span className="leading-none">
-            <span className="block text-xl font-black tracking-tight text-gray-950">LapSoft</span>
-            <span className="mt-1 hidden text-xs font-semibold text-gray-500 sm:block">wynajem sprzętu IT</span>
-          </span>
+        <Link href="/" className="flex items-center" aria-label="LapSoft - strona główna">
+          <Image
+            src="/images/logo/logo-lapsoft-header.png"
+            alt="LapSoft"
+            width={771}
+            height={213}
+            priority
+            unoptimized
+            className="h-10 w-auto object-contain sm:h-11"
+          />
         </Link>
 
         <div className="hidden items-center gap-2 md:flex">
@@ -44,10 +47,10 @@ export default function Navbar() {
             </Link>
           ))}
           <Link
-            href="/kontakt"
+            href="/pakiety"
             className="ml-3 rounded-md bg-[#6f9f1f] px-5 py-2.5 text-sm font-black uppercase text-white shadow-sm shadow-[#102018]/15 transition-colors hover:bg-[#5f8818]"
           >
-            Zapytaj o ofertę
+            Konfigurator
           </Link>
         </div>
 
@@ -78,11 +81,11 @@ export default function Navbar() {
             </Link>
           ))}
           <Link
-            href="/kontakt"
+            href="/pakiety"
             onClick={() => setOpen(false)}
             className="mt-3 block rounded-md bg-[#6f9f1f] px-5 py-3 text-center text-base font-black uppercase text-white"
           >
-            Zapytaj o ofertę
+            Konfigurator
           </Link>
         </div>
       )}
