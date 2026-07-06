@@ -11,6 +11,7 @@ export interface Inquiry {
   age?: string
   packageId: string
   period: string
+  equipmentIds?: string[]
   addons: string[]
   buyout: boolean
   message: string
