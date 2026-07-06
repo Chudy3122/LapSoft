@@ -16,6 +16,7 @@ export async function POST(req: NextRequest) {
       age: String(data.age || '').slice(0, 5),
       packageId: String(data.packageId).slice(0, 50),
       period: String(data.period).slice(0, 5),
+      equipmentIds: Array.isArray(data.equipmentIds) ? data.equipmentIds.map(String).slice(0, 4) : [],
       addons: Array.isArray(data.addons) ? data.addons.map(String) : [],
       buyout: Boolean(data.buyout),
       message: String(data.message || '').slice(0, 1000),

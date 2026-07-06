@@ -2,17 +2,19 @@
 import { useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { equipment } from '@/data/equipment'
 import { packages } from '@/data/packages'
 import { softwareAddons } from '@/data/software'
 
 const contactFlow = [
-  ['01', 'Zostaw kontakt', 'Podaj telefon i podstawowe potrzeby. Resztę możemy doprecyzować podczas rozmowy.'],
-  ['02', 'Dobieramy zestaw', 'Sprawdzimy, czy lepszy będzie laptop, monitor czy komputer stacjonarny.'],
-  ['03', 'Potwierdzasz ofertę', 'Dostajesz propozycję miesięcznej raty i decydujesz, czy idziemy dalej.'],
+  ['01', 'Wysyłasz zapytanie', 'Podajesz podstawowe dane i wstępny wybór. To nie jest zamówienie ani podpisanie umowy.'],
+  ['02', 'Doprecyzowujemy potrzeby', 'Oddzwonimy, dopytamy o zastosowanie sprzętu i sprawdzimy, czy konfiguracja ma sens.'],
+  ['03', 'Dostajesz propozycję', 'Przygotujemy ofertę z miesięczną ratą. Dopiero wtedy decydujesz, czy chcesz iść dalej.'],
 ]
 
 function KontaktForm() {
   const searchParams = useSearchParams()
+  const initialEquipmentIds = searchParams.getAll('equipment')
   const [form, setForm] = useState({
     name: '',
     phone: '',
@@ -20,6 +22,7 @@ function KontaktForm() {
     age: '',
     packageId: searchParams.get('package') || 'laptop-monitor',
     period: searchParams.get('period') || '12',
+    equipmentIds: initialEquipmentIds,
     addons: [] as string[],
     buyout: false,
     message: '',
@@ -28,7 +31,13 @@ function KontaktForm() {
 
   const pkg = packages.find(p => p.id === form.packageId)
   const basePrice = pkg ? pkg.prices[form.period as '6' | '12' | '24'] : 0
-  const addonsTotal = form.addons.reduce((sum, id) => sum + (softwareAddons.find(a => a.id === id)?.price ?? 0), 0)
+  const selectedAddonItems = form.addons
+    .map(id => softwareAddons.find(a => a.id === id))
+    .filter(Boolean) as typeof softwareAddons
+  const selectedEquipmentItems = form.equipmentIds
+    .map(id => equipment.find(item => item.id === id))
+    .filter(Boolean) as typeof equipment
+  const addonsTotal = selectedAddonItems.reduce((sum, addon) => sum + addon.price, 0)
   const total = basePrice + addonsTotal
 
   const set = (field: string, value: string | boolean | string[]) =>
@@ -61,7 +70,10 @@ function KontaktForm() {
         </div>
         <h2 className="text-4xl font-black tracking-tight text-gray-950">Dziękujemy!</h2>
         <p className="mt-4 text-lg leading-8 text-gray-600">
-          Skontaktujemy się z Tobą w ciągu <strong>24 godzin</strong>. Sprawdź skrzynkę e-mail albo poczekaj na telefon.
+          Zapytanie zostało wysłane. Skontaktujemy się z Tobą w ciągu <strong>24 godzin</strong>, żeby spokojnie potwierdzić potrzeby i odpowiedzieć na pytania.
+        </p>
+        <p className="mt-3 rounded-lg bg-[#eef8dd] px-5 py-4 text-sm font-bold leading-6 text-[#456c12]">
+          To nadal nie jest zamówienie ani umowa. Decyzję podejmujesz dopiero po rozmowie i otrzymaniu konkretnej propozycji.
         </p>
         <Link href="/" className="mt-8 inline-block rounded-md bg-[#6f9f1f] px-8 py-4 text-base font-black text-white transition-colors hover:bg-[#5f8818]">
           Wróć na stronę główną
@@ -112,7 +124,7 @@ function KontaktForm() {
                 name="package"
                 value={p.id}
                 checked={form.packageId === p.id}
-                onChange={e => set('packageId', e.target.value)}
+                onChange={e => setForm(prev => ({ ...prev, packageId: e.target.value, equipmentIds: [] }))}
                 className="sr-only"
               />
               <div className={`rounded-lg border-2 p-4 text-center transition-all ${
@@ -145,6 +157,37 @@ function KontaktForm() {
             </label>
           ))}
         </div>
+
+        {(pkg || selectedEquipmentItems.length > 0) && (
+          <div className="mt-6 rounded-lg border border-[#7DB122]/25 bg-[#eef8dd] p-4">
+            <p className="text-xs font-black uppercase tracking-widest text-[#5f8818]">Podsumowanie zapytania</p>
+            <div className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
+              <div>
+                <p className="font-bold text-gray-500">Pakiet</p>
+                <p className="mt-1 font-black text-gray-950">{pkg?.name ?? form.packageId}</p>
+              </div>
+              <div>
+                <p className="font-bold text-gray-500">Okres</p>
+                <p className="mt-1 font-black text-gray-950">{form.period} miesięcy</p>
+              </div>
+            </div>
+            {selectedEquipmentItems.length > 0 && (
+              <div className="mt-4">
+                <p className="font-bold text-gray-500">Sprzęt wybrany w konfiguratorze</p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {selectedEquipmentItems.map(item => (
+                    <span key={item.id} className="rounded-md bg-white px-3 py-1.5 text-xs font-black text-gray-700">
+                      {item.brand} {item.model}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            <p className="mt-4 text-xs font-semibold leading-5 text-[#456c12]">
+              Możesz zmienić wybór podczas rozmowy. Potraktujemy to jako punkt startowy do przygotowania oferty.
+            </p>
+          </div>
+        )}
       </section>
 
       <section className="rounded-lg border border-[#102018]/10 bg-white p-5 shadow-sm md:p-6">
@@ -217,15 +260,51 @@ function KontaktForm() {
               To nie jest podpisanie umowy ani złożenie zamówienia. Skontaktujemy się, odpowiemy na pytania i dopiero później możesz zdecydować, czy oferta Ci odpowiada.
             </p>
           </div>
+          <div className="mb-4 space-y-2 rounded-lg border border-white/10 bg-white/[0.04] p-4 text-sm">
+            <div className="flex justify-between gap-4 text-[#f4f9ed]/70">
+              <span>Pakiet</span>
+              <span className="text-right font-black text-white">{pkg?.name ?? form.packageId}</span>
+            </div>
+            <div className="flex justify-between gap-4 text-[#f4f9ed]/70">
+              <span>Okres</span>
+              <span className="font-black text-white">{form.period} mies.</span>
+            </div>
+            {selectedEquipmentItems.length > 0 && (
+              <div className="pt-2">
+                <p className="mb-2 text-xs font-black uppercase tracking-widest text-[#dff2b8]">Wybrany sprzęt</p>
+                <div className="space-y-1">
+                  {selectedEquipmentItems.map(item => (
+                    <div key={item.id} className="flex justify-between gap-4 text-[#f4f9ed]/70">
+                      <span>{item.category === 'monitor' ? 'Monitor' : item.category === 'pc' ? 'Komputer PC' : 'Laptop'}</span>
+                      <span className="text-right font-black text-white">{item.brand} {item.model}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {selectedAddonItems.length > 0 && (
+              <div className="pt-2">
+                <p className="mb-2 text-xs font-black uppercase tracking-widest text-[#dff2b8]">Dodatki</p>
+                <div className="space-y-1">
+                  {selectedAddonItems.map(addon => (
+                    <div key={addon.id} className="flex justify-between gap-4 text-[#f4f9ed]/70">
+                      <span>{addon.name}</span>
+                      <span className="font-black text-white">+{addon.price} zł</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
           <button
             type="submit"
             disabled={status === 'sending'}
             className="w-full rounded-md bg-[#6f9f1f] py-4 text-base font-black text-white transition-colors hover:bg-[#5f8818] disabled:opacity-60"
           >
-            {status === 'sending' ? 'Wysyłam...' : 'Poproś o kontakt'}
+            {status === 'sending' ? 'Wysyłam zapytanie...' : 'Wyślij zapytanie bez zobowiązań'}
           </button>
           {status === 'error' && (
-            <p className="mt-3 text-center text-sm font-semibold text-red-300">Wystąpił błąd. Spróbuj ponownie lub zadzwoń do nas.</p>
+            <p className="mt-3 text-center text-sm font-semibold text-red-300">Nie udało się wysłać zapytania. Spróbuj ponownie albo zadzwoń do nas.</p>
           )}
           <p className="mt-3 text-center text-xs font-semibold text-[#f4f9ed]/50">Odpowiemy w ciągu 24 godzin</p>
         </div>

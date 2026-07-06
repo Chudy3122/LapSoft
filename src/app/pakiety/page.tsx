@@ -314,7 +314,7 @@ export default function PakietyPage() {
         <aside className="lg:sticky lg:top-24 lg:self-start">
           <div className="overflow-hidden rounded-lg border border-white/12 bg-[#102018] text-white shadow-2xl shadow-[#102018]/15">
             <div className="border-b border-white/10 p-6">
-              <p className="text-xs font-black uppercase tracking-widest text-[#dff2b8]">Podsumowanie</p>
+              <p className="text-xs font-black uppercase tracking-widest text-[#dff2b8]">Wstępna kalkulacja</p>
               <p className="mt-4 text-sm font-semibold text-[#f4f9ed]/60">Miesięczna rata</p>
               <p className="mt-1 text-6xl font-black leading-none text-[#dff2b8]">{totalMonthly}</p>
               <p className="mt-2 text-sm font-semibold text-[#f4f9ed]/60">zł / miesiąc przez {periodLabel}</p>
@@ -361,11 +361,17 @@ export default function PakietyPage() {
                 <p className="font-black text-[#dff2b8]">Sprzęt dostarczamy za 1 zł</p>
                 <p className="mt-1 text-xs font-semibold text-[#f4f9ed]/55">Dostawa i konfiguracja w cenie</p>
               </div>
+              <div className="mb-4 rounded-lg border border-white/10 bg-white/[0.04] p-4">
+                <p className="font-black text-white">To jeszcze nie jest zamówienie.</p>
+                <p className="mt-1 text-xs font-semibold leading-5 text-[#f4f9ed]/55">
+                  Wyślesz zapytanie z wybraną konfiguracją. Po rozmowie możesz ją zmienić albo zrezygnować bez zobowiązań.
+                </p>
+              </div>
               <Link
                 href={`/kontakt?${contactQuery.toString()}`}
                 className="block rounded-md bg-[#6f9f1f] px-6 py-4 text-center text-base font-black text-white transition-colors hover:bg-[#5f8818]"
               >
-                Zamów ten pakiet
+                Poproś o ofertę bez zobowiązań
               </Link>
               <p className="mt-3 text-center text-xs font-semibold text-[#f4f9ed]/50">Odpowiadamy w ciągu 24 godzin</p>
             </div>

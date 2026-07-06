@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { equipment } from '@/data/equipment'
 import { packages } from '@/data/packages'
 import { softwareAddons } from '@/data/software'
 import type { Inquiry } from '@/lib/storage'
@@ -206,6 +207,18 @@ export default function AdminDashboard() {
                   <p className="text-xs font-black uppercase tracking-widest text-[#5f8818]">Wybrany pakiet</p>
                   <p className="mt-2 text-2xl font-black text-gray-950">{packages.find(p => p.id === selected.packageId)?.name ?? selected.packageId}</p>
                   <p className="mt-1 text-sm font-semibold text-gray-600">Okres: {selected.period} miesięcy</p>
+                  {selected.equipmentIds && selected.equipmentIds.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {selected.equipmentIds.map(id => {
+                        const item = equipment.find(e => e.id === id)
+                        return item ? (
+                          <span key={id} className="rounded-md bg-white px-3 py-1 text-xs font-black text-gray-600">
+                            {item.brand} {item.model}
+                          </span>
+                        ) : null
+                      })}
+                    </div>
+                  )}
                   {selected.addons.length > 0 && (
                     <div className="mt-3 flex flex-wrap gap-2">
                       {selected.addons.map(id => {
