@@ -1,16 +1,19 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { equipment, type Equipment } from '@/data/equipment'
+import { applyInventory, type InventoryMap } from '@/lib/inventory'
 
-type Category = 'all' | 'laptop' | 'pc' | 'monitor'
+type Category = 'all' | 'laptop' | 'pc' | 'monitor' | 'biurko' | 'krzeslo'
 
 const categoryLabels: Record<Category, string> = {
   all: 'Wszystkie',
   laptop: 'Laptopy',
   pc: 'Komputery PC',
   monitor: 'Monitory',
+  biurko: 'Biurka',
+  krzeslo: 'Krzesła',
 }
 
 const categoryCounts: Record<Category, number> = {
@@ -18,6 +21,8 @@ const categoryCounts: Record<Category, number> = {
   laptop: equipment.filter(item => item.category === 'laptop').length,
   pc: equipment.filter(item => item.category === 'pc').length,
   monitor: equipment.filter(item => item.category === 'monitor').length,
+  biurko: equipment.filter(item => item.category === 'biurko').length,
+  krzeslo: equipment.filter(item => item.category === 'krzeslo').length,
 }
 
 function EquipmentCard({ item, eagerImage = false }: { item: Equipment; eagerImage?: boolean }) {
@@ -55,8 +60,10 @@ function EquipmentCard({ item, eagerImage = false }: { item: Equipment; eagerIma
             </div>
           )}
         </Link>
-        <span className="absolute right-4 top-4 rounded-md bg-[#6f9f1f] px-3 py-1 text-xs font-black uppercase text-white">
-          Dostępny
+        <span className={`absolute right-4 top-4 rounded-md px-3 py-1 text-xs font-black uppercase text-white ${
+          item.units > 0 ? 'bg-[#6f9f1f]' : 'bg-gray-400'
+        }`}>
+          {item.units > 0 ? 'Dostępny' : 'Niedostępny'}
         </span>
         <span className="absolute left-4 top-4 rounded-md bg-white/85 px-3 py-1 text-xs font-black uppercase text-[#5f8818] shadow-sm">
           {item.units} szt.
@@ -90,10 +97,23 @@ function EquipmentCard({ item, eagerImage = false }: { item: Equipment; eagerIma
 
 export default function SprzętPage() {
   const [activeCategory, setActiveCategory] = useState<Category>('all')
+  const [inventory, setInventory] = useState<InventoryMap | null>(null)
+
+  // Pobierz aktualne dostępności z Google Sheets (przez /api/inventory)
+  useEffect(() => {
+    let ignore = false
+    fetch('/api/inventory')
+      .then(res => (res.ok ? res.json() : null))
+      .then(data => { if (!ignore) setInventory(data) })
+      .catch(() => {})
+    return () => { ignore = true }
+  }, [])
+
+  const liveEquipment = useMemo(() => applyInventory(equipment, inventory), [inventory])
 
   const filtered = activeCategory === 'all'
-    ? equipment
-    : equipment.filter(e => e.category === activeCategory)
+    ? liveEquipment
+    : liveEquipment.filter(e => e.category === activeCategory)
 
   return (
     <div className="bg-[#f6f8f5]">

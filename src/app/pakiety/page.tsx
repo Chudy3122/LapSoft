@@ -1,8 +1,9 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { equipment, type Equipment } from '@/data/equipment'
+import { applyInventory, type InventoryMap } from '@/lib/inventory'
 import { packages, periods, type PeriodKey } from '@/data/packages'
 import { softwareAddons } from '@/data/software'
 
@@ -12,6 +13,8 @@ const equipmentCategoryLabels: Record<EquipmentCategory, string> = {
   laptop: 'Laptop',
   pc: 'Komputer PC',
   monitor: 'Monitor',
+  biurko: 'Biurko',
+  krzeslo: 'Krzesło',
 }
 
 const packageEquipmentCategories: Record<string, EquipmentCategory[]> = {
@@ -20,10 +23,12 @@ const packageEquipmentCategories: Record<string, EquipmentCategory[]> = {
   'pc-monitor': ['pc', 'monitor'],
 }
 
-const defaultEquipmentByCategory = {
+const defaultEquipmentByCategory: Record<EquipmentCategory, string> = {
   laptop: equipment.find(item => item.category === 'laptop')?.id ?? '',
   pc: equipment.find(item => item.category === 'pc')?.id ?? '',
   monitor: equipment.find(item => item.category === 'monitor')?.id ?? '',
+  biurko: equipment.find(item => item.category === 'biurko')?.id ?? '',
+  krzeslo: equipment.find(item => item.category === 'krzeslo')?.id ?? '',
 }
 
 export default function PakietyPage() {
@@ -32,6 +37,19 @@ export default function PakietyPage() {
   const [selectedAddons, setSelectedAddons] = useState<string[]>([])
   const [selectedEquipmentByCategory, setSelectedEquipmentByCategory] = useState<Record<EquipmentCategory, string>>(defaultEquipmentByCategory)
   const [withBuyout, setWithBuyout] = useState(false)
+  const [inventory, setInventory] = useState<InventoryMap | null>(null)
+
+  // Aktualne dostępności z Google Sheets
+  useEffect(() => {
+    let ignore = false
+    fetch('/api/inventory')
+      .then(res => (res.ok ? res.json() : null))
+      .then(data => { if (!ignore) setInventory(data) })
+      .catch(() => {})
+    return () => { ignore = true }
+  }, [])
+
+  const liveEquipment = useMemo(() => applyInventory(equipment, inventory), [inventory])
 
   const pkg = packages.find(p => p.id === selectedPackage)!
   const requiredEquipmentCategories = packageEquipmentCategories[selectedPackage] ?? []
@@ -148,7 +166,7 @@ export default function PakietyPage() {
 
             <div className="mt-5 space-y-5">
               {requiredEquipmentCategories.map(category => {
-                const categoryEquipment = equipment.filter(item => item.category === category)
+                const categoryEquipment = liveEquipment.filter(item => item.category === category)
 
                 return (
                   <div key={category}>

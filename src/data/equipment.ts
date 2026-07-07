@@ -1,6 +1,6 @@
 export interface Equipment {
   id: string
-  category: 'laptop' | 'pc' | 'monitor'
+  category: 'laptop' | 'pc' | 'monitor' | 'biurko' | 'krzeslo'
   brand: string
   model: string
   image: string
@@ -54,7 +54,7 @@ export const equipment: Equipment[] = [
     model: 'Inspiron 15 3530',
     image: '/images/sprzet/dell-inspiron-3530.png',
     cardImage: '/images/sprzet/cards/dell-inspiron-3530-card.webp',
-    units: 2,
+    units: 10,
     description: 'Wydajny laptop z większą pamięcią RAM — płynna praca z wieloma aplikacjami naraz. Świetny wybór dla wymagających użytkowników.',
     specs: [
       { label: 'Procesor', value: 'Intel Core i5 13. generacji' },
@@ -72,7 +72,7 @@ export const equipment: Equipment[] = [
     model: 'Latitude 3550',
     image: '/images/sprzet/dell-latitude-3550.png',
     cardImage: '/images/sprzet/cards/dell-latitude-3550-card.webp',
-    units: 5,
+    units: 4,
     description: 'Profesjonalny laptop klasy biznesowej z rozszerzonymi funkcjami bezpieczeństwa. Trwała budowa, długa żywotność baterii.',
     specs: [
       { label: 'Procesor', value: 'Intel Core i5 13. generacji' },
@@ -90,7 +90,7 @@ export const equipment: Equipment[] = [
     model: 'Pro SFF 290 G9',
     image: '/images/sprzet/hp-pro-290-g9.png',
     cardImage: '/images/sprzet/cards/hp-pro-290-g9-card.webp',
-    units: 4,
+    units: 5,
     description: 'Kompaktowy komputer stacjonarny do biurka — zajmuje mało miejsca, a pracuje wydajnie. Idealny do domu.',
     specs: [
       { label: 'Procesor', value: 'Intel Core i3/i5 12. generacji' },
@@ -102,13 +102,29 @@ export const equipment: Equipment[] = [
     ],
   },
   {
+    id: 'g4m3r-hero',
+    category: 'pc',
+    brand: 'G4M3R',
+    model: 'Hero',
+    image: '/images/sprzet/g4m3r-hero.png',
+    cardImage: '/images/sprzet/cards/g4m3r-hero-card.webp',
+    units: 2,
+    description: 'Wydajny komputer gamingowy dla wymagających — do gier, montażu wideo i pracy z ciężkimi aplikacjami. Mocny procesor i dedykowana grafika.',
+    specs: [
+      { label: 'Typ', value: 'Komputer gamingowy' },
+      { label: 'Procesor', value: 'Wysokowydajny' },
+      { label: 'Grafika', value: 'Dedykowana karta GPU' },
+      { label: 'Zastosowanie', value: 'Gry, kreacja, praca' },
+    ],
+  },
+  {
     id: 'xiaomi-a27i',
     category: 'monitor',
     brand: 'Xiaomi',
     model: 'A27i',
     image: '/images/sprzet/xiaomi-a27i.png',
     cardImage: '/images/sprzet/cards/xiaomi-a27i-card.webp',
-    units: 32,
+    units: 44,
     description: 'Duży, czytelny monitor 27 cali — idealna wielkość do wygodnej pracy i oglądania filmów bez zmęczenia oczu.',
     specs: [
       { label: 'Przekątna', value: '27 cali' },
@@ -117,6 +133,38 @@ export const equipment: Equipment[] = [
       { label: 'Odświeżanie', value: '100 Hz' },
       { label: 'Złącza', value: 'HDMI, VGA' },
       { label: 'Regulacja', value: 'Pochylenie ekranu' },
+    ],
+  },
+  {
+    id: 'biurko-songmics',
+    category: 'biurko',
+    brand: 'Songmics',
+    model: 'Biurko biurowe',
+    image: '/images/sprzet/biurko-songmics.png',
+    cardImage: '/images/sprzet/cards/biurko-songmics-card.webp',
+    units: 60,
+    description: 'Solidne, mobilne biurko do domowego biura. Stabilny blat i wygodna przestrzeń robocza — idealne uzupełnienie zestawu komputerowego.',
+    specs: [
+      { label: 'Typ', value: 'Biurko biurowe' },
+      { label: 'Blat', value: 'Przestronny' },
+      { label: 'Konstrukcja', value: 'Metalowa rama' },
+      { label: 'Mobilność', value: 'Łatwe przestawianie' },
+    ],
+  },
+  {
+    id: 'krzeslo-allfordson',
+    category: 'krzeslo',
+    brand: 'Allfordson',
+    model: 'Fotel ergonomiczny',
+    image: '/images/sprzet/krzeslo-allfordson.png',
+    cardImage: '/images/sprzet/cards/krzeslo-allfordson-card.webp',
+    units: 67,
+    description: 'Ergonomiczny fotel biurowy z podparciem lędźwiowym. Komfort podczas długiej pracy przy komputerze i regulacja dopasowana do użytkownika.',
+    specs: [
+      { label: 'Typ', value: 'Fotel biurowy' },
+      { label: 'Ergonomia', value: 'Podparcie lędźwiowe' },
+      { label: 'Regulacja', value: 'Wysokość i podłokietniki' },
+      { label: 'Obrót', value: '360°' },
     ],
   },
 ]

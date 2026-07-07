@@ -3,6 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { equipment } from '@/data/equipment'
+import { getInventory } from '@/lib/inventory'
 
 type EquipmentDetailsPageProps = {
   params: Promise<{ id: string }>
@@ -12,6 +13,8 @@ const categoryLabels = {
   laptop: 'Laptop',
   pc: 'Komputer PC',
   monitor: 'Monitor',
+  biurko: 'Biurko',
+  krzeslo: 'Krzesło',
 } as const
 
 function getEquipment(id: string) {
@@ -49,6 +52,11 @@ export default async function EquipmentDetailsPage({
   if (!item) {
     notFound()
   }
+
+  // Aktualna dostępność z Google Sheets (z fallbackiem na wartość statyczną)
+  const inventory = await getInventory()
+  const units = inventory[item.id]?.units ?? item.units
+  const isAvailable = units > 0
 
   const otherEquipment = equipment
     .filter(equipmentItem => equipmentItem.id !== item.id)
@@ -94,11 +102,13 @@ export default async function EquipmentDetailsPage({
               <div className="mt-7 grid max-w-xl grid-cols-2 overflow-hidden rounded-lg border border-white/12 bg-white/8">
                 <div className="p-5">
                   <p className="text-xs font-bold uppercase tracking-wider text-[#f4f9ed]/55">Dostępność</p>
-                  <p className="mt-1 text-3xl font-black text-[#dff2b8]">{item.units} szt.</p>
+                  <p className="mt-1 text-3xl font-black text-[#dff2b8]">{units} szt.</p>
                 </div>
                 <div className="border-l border-white/10 p-5">
                   <p className="text-xs font-bold uppercase tracking-wider text-[#f4f9ed]/55">Status</p>
-                  <p className="mt-1 text-3xl font-black text-[#dff2b8]">Dostępny</p>
+                  <p className={`mt-1 text-3xl font-black ${isAvailable ? 'text-[#dff2b8]' : 'text-gray-400'}`}>
+                    {isAvailable ? 'Dostępny' : 'Niedostępny'}
+                  </p>
                 </div>
               </div>
 
