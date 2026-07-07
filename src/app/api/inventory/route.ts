@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server'
 import { getInventory } from '@/lib/inventory'
 
-// Cache na 5 minut — dane z arkusza nie muszą być odświeżane przy każdym wejściu.
-export const revalidate = 300
+// Zawsze świeże — pobiera aktualny stan z arkusza przy każdym żądaniu (bez cache po naszej stronie).
+export const dynamic = 'force-dynamic'
 
 export async function GET() {
   const inventory = await getInventory()
-  return NextResponse.json(inventory)
+  return NextResponse.json(inventory, {
+    headers: { 'Cache-Control': 'no-store, max-age=0' },
+  })
 }

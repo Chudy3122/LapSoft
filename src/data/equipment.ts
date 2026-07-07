@@ -54,7 +54,7 @@ export const equipment: Equipment[] = [
     model: 'Inspiron 15 3530',
     image: '/images/sprzet/dell-inspiron-3530.png',
     cardImage: '/images/sprzet/cards/dell-inspiron-3530-card.webp',
-    units: 10,
+    units: 0,
     description: 'Wydajny laptop z większą pamięcią RAM — płynna praca z wieloma aplikacjami naraz. Świetny wybór dla wymagających użytkowników.',
     specs: [
       { label: 'Procesor', value: 'Intel Core i5 13. generacji' },
@@ -72,7 +72,7 @@ export const equipment: Equipment[] = [
     model: 'Latitude 3550',
     image: '/images/sprzet/dell-latitude-3550.png',
     cardImage: '/images/sprzet/cards/dell-latitude-3550-card.webp',
-    units: 4,
+    units: 0,
     description: 'Profesjonalny laptop klasy biznesowej z rozszerzonymi funkcjami bezpieczeństwa. Trwała budowa, długa żywotność baterii.',
     specs: [
       { label: 'Procesor', value: 'Intel Core i5 13. generacji' },

@@ -39,14 +39,18 @@ export default function PakietyPage() {
   const [withBuyout, setWithBuyout] = useState(false)
   const [inventory, setInventory] = useState<InventoryMap | null>(null)
 
-  // Aktualne dostępności z Google Sheets
+  // Aktualne dostępności z Google Sheets, odświeżane co 30 s
   useEffect(() => {
-    let ignore = false
-    fetch('/api/inventory')
-      .then(res => (res.ok ? res.json() : null))
-      .then(data => { if (!ignore) setInventory(data) })
-      .catch(() => {})
-    return () => { ignore = true }
+    let active = true
+    const load = () => {
+      fetch('/api/inventory', { cache: 'no-store' })
+        .then(res => (res.ok ? res.json() : null))
+        .then(data => { if (active && data) setInventory(data) })
+        .catch(() => {})
+    }
+    load()
+    const timer = setInterval(load, 30000)
+    return () => { active = false; clearInterval(timer) }
   }, [])
 
   const liveEquipment = useMemo(() => applyInventory(equipment, inventory), [inventory])

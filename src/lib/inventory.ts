@@ -3,8 +3,6 @@ import { equipment as staticEquipment, type Equipment } from '@/data/equipment'
 // Mapa dostępności pobrana z Google Sheets: klucz = id sprzętu.
 export type InventoryMap = Record<string, { units: number; available: boolean }>
 
-const REVALIDATE_SECONDS = 300 // odświeżaj dane z arkusza co 5 minut
-
 // --- Normalizacja tekstu do dopasowań (bez ogonków, małe litery, tylko alfanumeryczne) ---
 function normalize(s: string): string {
   return s
@@ -91,7 +89,9 @@ export async function getInventory(): Promise<InventoryMap> {
   const url = process.env.GOOGLE_SHEET_CSV_URL
   if (!url) return {}
   try {
-    const res = await fetch(url, { next: { revalidate: REVALIDATE_SECONDS } })
+    // Zawsze świeże dane (bez cache po naszej stronie) + cache-busting, by ograniczyć cache Google/CDN.
+    const bustUrl = `${url}${url.includes('?') ? '&' : '?'}_cb=${Date.now()}`
+    const res = await fetch(bustUrl, { cache: 'no-store' })
     if (!res.ok) return {}
     const rows = parseCsv(await res.text())
     if (rows.length < 2) return {}
