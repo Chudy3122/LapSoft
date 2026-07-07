@@ -1,6 +1,7 @@
-import fs from 'fs'
-import path from 'path'
+import { prisma } from '@/lib/prisma'
+import type { InquiryModel as DbInquiry } from '@/generated/prisma/models'
 
+// Publiczny kształt zapytania używany w UI (createdAt jako ISO string).
 export interface Inquiry {
   id: string
   createdAt: string
@@ -16,39 +17,72 @@ export interface Inquiry {
   buyout: boolean
   message: string
   monthlyTotal: number
+  userId?: string | null
 }
 
-const filePath = path.join(process.cwd(), 'data-storage', 'inquiries.json')
-
-function ensureFile() {
-  const dir = path.dirname(filePath)
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
-  if (!fs.existsSync(filePath)) fs.writeFileSync(filePath, '[]', 'utf-8')
-}
-
-export function getInquiries(): Inquiry[] {
-  ensureFile()
-  return JSON.parse(fs.readFileSync(filePath, 'utf-8'))
-}
-
-export function addInquiry(data: Omit<Inquiry, 'id' | 'createdAt' | 'status'>): Inquiry {
-  const inquiries = getInquiries()
-  const inquiry: Inquiry = {
-    ...data,
-    id: Date.now().toString(),
-    createdAt: new Date().toISOString(),
-    status: 'nowe',
+function toInquiry(row: DbInquiry): Inquiry {
+  return {
+    id: row.id,
+    createdAt: row.createdAt.toISOString(),
+    status: row.status as Inquiry['status'],
+    name: row.name,
+    phone: row.phone,
+    email: row.email,
+    age: row.age ?? undefined,
+    packageId: row.packageId,
+    period: row.period,
+    equipmentIds: row.equipmentIds,
+    addons: row.addons,
+    buyout: row.buyout,
+    message: row.message,
+    monthlyTotal: row.monthlyTotal,
+    userId: row.userId,
   }
-  inquiries.unshift(inquiry)
-  fs.writeFileSync(filePath, JSON.stringify(inquiries, null, 2), 'utf-8')
-  return inquiry
 }
 
-export function updateInquiryStatus(id: string, status: Inquiry['status']): boolean {
-  const inquiries = getInquiries()
-  const idx = inquiries.findIndex(i => i.id === id)
-  if (idx === -1) return false
-  inquiries[idx].status = status
-  fs.writeFileSync(filePath, JSON.stringify(inquiries, null, 2), 'utf-8')
-  return true
+export async function getInquiries(): Promise<Inquiry[]> {
+  const rows = await prisma.inquiry.findMany({ orderBy: { createdAt: 'desc' } })
+  return rows.map(toInquiry)
+}
+
+export async function getInquiriesByUser(userId: string): Promise<Inquiry[]> {
+  const rows = await prisma.inquiry.findMany({
+    where: { userId },
+    orderBy: { createdAt: 'desc' },
+  })
+  return rows.map(toInquiry)
+}
+
+export async function addInquiry(
+  data: Omit<Inquiry, 'id' | 'createdAt' | 'status'>
+): Promise<Inquiry> {
+  const row = await prisma.inquiry.create({
+    data: {
+      name: data.name,
+      phone: data.phone,
+      email: data.email,
+      age: data.age || null,
+      packageId: data.packageId,
+      period: data.period,
+      equipmentIds: data.equipmentIds ?? [],
+      addons: data.addons ?? [],
+      buyout: data.buyout,
+      message: data.message,
+      monthlyTotal: data.monthlyTotal,
+      userId: data.userId ?? null,
+    },
+  })
+  return toInquiry(row)
+}
+
+export async function updateInquiryStatus(
+  id: string,
+  status: Inquiry['status']
+): Promise<boolean> {
+  try {
+    await prisma.inquiry.update({ where: { id }, data: { status } })
+    return true
+  } catch {
+    return false
+  }
 }

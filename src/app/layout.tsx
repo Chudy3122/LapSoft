@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
+import { getSession } from '@/lib/session'
 
 const inter = Inter({ subsets: ['latin', 'latin-ext'] })
 
@@ -16,11 +17,14 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const session = await getSession()
+  const user = session ? { name: session.name, role: session.role } : null
+
   return (
     <html lang="pl">
       <body className={`${inter.className} bg-gray-50 text-gray-800 min-h-screen flex flex-col`}>
-        <Navbar />
+        <Navbar user={user} />
         <main className="flex-1">{children}</main>
         <Footer />
       </body>

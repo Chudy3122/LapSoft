@@ -1,0 +1,52 @@
+// Schemat bazy danych LapSoft
+// Dokumentacja: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Konto użytkownika (klient lub administrator)
+model User {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  role         Role      @default(USER)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  inquiries    Inquiry[]
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+// Zapytanie z konfiguratora / formularza kontaktowego
+model Inquiry {
+  id           String   @id @default(cuid())
+  createdAt    DateTime @default(now())
+  status       String   @default("nowe") // "nowe" | "w toku" | "zakończone"
+  name         String
+  phone        String
+  email        String   @default("")
+  age          String?
+  packageId    String
+  period       String
+  equipmentIds String[]
+  addons       String[]
+  buyout       Boolean  @default(false)
+  message      String   @default("")
+  monthlyTotal Int      @default(0)
+
+  // Powiązanie z zalogowanym klientem (opcjonalne — formularz działa też bez konta)
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+}

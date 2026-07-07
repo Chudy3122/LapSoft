@@ -65,8 +65,9 @@ export default function AdminDashboard() {
     if (selected?.id === id) setSelected(prev => prev ? { ...prev, status } : null)
   }
 
-  function logout() {
+  async function logout() {
     sessionStorage.removeItem('lapsoft-admin')
+    await fetch('/api/admin/login', { method: 'DELETE' })
     router.push('/admin')
   }
 

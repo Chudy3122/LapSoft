@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { addInquiry } from '@/lib/storage'
+import { getSession } from '@/lib/session'
 
 export async function POST(req: NextRequest) {
   try {
@@ -9,7 +10,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Brakujące pola' }, { status: 400 })
     }
 
-    const inquiry = addInquiry({
+    // Jeśli klient jest zalogowany, powiąż zapytanie z jego kontem
+    const session = await getSession()
+
+    const inquiry = await addInquiry({
       name: String(data.name).slice(0, 100),
       phone: String(data.phone).slice(0, 20),
       email: String(data.email || '').slice(0, 100),
@@ -21,6 +25,7 @@ export async function POST(req: NextRequest) {
       buyout: Boolean(data.buyout),
       message: String(data.message || '').slice(0, 1000),
       monthlyTotal: Number(data.monthlyTotal) || 0,
+      userId: session?.role === 'USER' ? session.userId : null,
     })
 
     return NextResponse.json({ success: true, id: inquiry.id })
