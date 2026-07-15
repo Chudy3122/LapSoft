@@ -1,11 +1,18 @@
 'use client'
 
 import Link from 'next/link'
-import { useActionState } from 'react'
+import { Suspense, useActionState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { register } from '@/app/actions/auth'
 
-export default function RegisterPage() {
+function RegisterForm() {
+  const searchParams = useSearchParams()
+  const redirectTo = searchParams.get('redirectTo') ?? ''
+  const loginHref = redirectTo
+    ? `/logowanie?redirectTo=${encodeURIComponent(redirectTo)}`
+    : '/logowanie'
   const [state, action, pending] = useActionState(register, undefined)
+  const returnsToContact = redirectTo.startsWith('/kontakt')
 
   return (
     <div className="relative isolate flex min-h-[calc(100vh-72px)] items-center justify-center overflow-hidden bg-[#102018] px-5 py-12 text-white sm:px-6">
@@ -23,11 +30,18 @@ export default function RegisterPage() {
           </div>
           <h1 className="text-3xl font-black tracking-tight">Załóż konto</h1>
           <p className="mt-2 text-sm text-[#f4f9ed]/60">Masz już konto?{' '}
-            <Link href="/logowanie" className="font-black text-[#dff2b8] underline-offset-2 hover:underline">Zaloguj się</Link>
+            <Link href={loginHref} className="font-black text-[#dff2b8] underline-offset-2 hover:underline">Zaloguj się</Link>
           </p>
+          {returnsToContact && (
+            <p className="mt-4 rounded-lg border border-[#7DB122]/25 bg-[#7DB122]/10 p-3 text-sm font-semibold leading-6 text-[#f4f9ed]/70">
+              Po założeniu konta wrócisz do formularza z zachowaną konfiguracją. Wysłane zapytanie trafi wtedy do panelu klienta.
+            </p>
+          )}
         </div>
 
         <form action={action} className="p-7">
+          <input type="hidden" name="redirectTo" value={redirectTo} />
+
           <label htmlFor="name" className="mb-2 block text-xs font-black uppercase tracking-widest text-[#dff2b8]">Imię i nazwisko</label>
           <input
             id="name" name="name" type="text" autoComplete="name" required autoFocus
@@ -69,5 +83,13 @@ export default function RegisterPage() {
         </form>
       </div>
     </div>
+  )
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div className="min-h-[calc(100vh-72px)] bg-[#102018]" />}>
+      <RegisterForm />
+    </Suspense>
   )
 }

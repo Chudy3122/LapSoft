@@ -1,11 +1,18 @@
 'use client'
 
 import Link from 'next/link'
-import { useActionState } from 'react'
+import { Suspense, useActionState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { login } from '@/app/actions/auth'
 
-export default function LoginPage() {
+function LoginForm() {
+  const searchParams = useSearchParams()
+  const redirectTo = searchParams.get('redirectTo') ?? ''
+  const registerHref = redirectTo
+    ? `/rejestracja?redirectTo=${encodeURIComponent(redirectTo)}`
+    : '/rejestracja'
   const [state, action, pending] = useActionState(login, undefined)
+  const returnsToContact = redirectTo.startsWith('/kontakt')
 
   return (
     <div className="relative isolate flex min-h-[calc(100vh-72px)] items-center justify-center overflow-hidden bg-[#102018] px-5 py-12 text-white sm:px-6">
@@ -23,11 +30,18 @@ export default function LoginPage() {
           </div>
           <h1 className="text-3xl font-black tracking-tight">Zaloguj się</h1>
           <p className="mt-2 text-sm text-[#f4f9ed]/60">Nie masz konta?{' '}
-            <Link href="/rejestracja" className="font-black text-[#dff2b8] underline-offset-2 hover:underline">Zarejestruj się</Link>
+            <Link href={registerHref} className="font-black text-[#dff2b8] underline-offset-2 hover:underline">Zarejestruj się</Link>
           </p>
+          {returnsToContact && (
+            <p className="mt-4 rounded-lg border border-[#7DB122]/25 bg-[#7DB122]/10 p-3 text-sm font-semibold leading-6 text-[#f4f9ed]/70">
+              Po zalogowaniu wrócisz do formularza z zachowaną konfiguracją. Wysłane zapytanie pojawi się wtedy w panelu klienta.
+            </p>
+          )}
         </div>
 
         <form action={action} className="p-7">
+          <input type="hidden" name="redirectTo" value={redirectTo} />
+
           <label htmlFor="email" className="mb-2 block text-xs font-black uppercase tracking-widest text-[#dff2b8]">E-mail</label>
           <input
             id="email" name="email" type="email" autoComplete="email" required autoFocus
@@ -53,5 +67,13 @@ export default function LoginPage() {
         </form>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-[calc(100vh-72px)] bg-[#102018]" />}>
+      <LoginForm />
+    </Suspense>
   )
 }

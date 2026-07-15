@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { equipment, type Equipment } from '@/data/equipment'
 import { applyInventory, type InventoryMap } from '@/lib/inventory'
 
-type Category = 'all' | 'laptop' | 'pc' | 'monitor' | 'biurko' | 'krzeslo'
+type Category = 'all' | 'laptop' | 'pc' | 'monitor' | 'biurko' | 'fotel'
 
 const categoryLabels: Record<Category, string> = {
   all: 'Wszystkie',
@@ -13,20 +13,12 @@ const categoryLabels: Record<Category, string> = {
   pc: 'Komputery PC',
   monitor: 'Monitory',
   biurko: 'Biurka',
-  krzeslo: 'Krzesła',
-}
-
-const categoryCounts: Record<Category, number> = {
-  all: equipment.length,
-  laptop: equipment.filter(item => item.category === 'laptop').length,
-  pc: equipment.filter(item => item.category === 'pc').length,
-  monitor: equipment.filter(item => item.category === 'monitor').length,
-  biurko: equipment.filter(item => item.category === 'biurko').length,
-  krzeslo: equipment.filter(item => item.category === 'krzeslo').length,
+  fotel: 'Fotele',
 }
 
 function EquipmentCard({ item, eagerImage = false }: { item: Equipment; eagerImage?: boolean }) {
   const [imgError, setImgError] = useState(false)
+  const cardSpecs = item.cardSpecs ?? item.specs.slice(0, 4)
 
   return (
     <article className="flex h-full flex-col overflow-hidden rounded-lg border border-[#102018]/10 bg-white shadow-sm">
@@ -76,7 +68,7 @@ function EquipmentCard({ item, eagerImage = false }: { item: Equipment; eagerIma
         <p className="mt-3 h-24 overflow-hidden text-sm leading-6 text-gray-500">{item.description}</p>
 
         <div className="mt-auto grid grid-cols-2 gap-2 pt-5">
-          {item.specs.slice(0, 4).map(spec => (
+          {cardSpecs.map(spec => (
             <div key={spec.label} className="min-h-[76px] rounded-md border border-[#102018]/8 bg-[#f6f8f5] px-3 py-2">
               <p className="text-xs font-bold text-gray-400">{spec.label}</p>
               <p className="mt-0.5 text-sm font-black text-gray-800">{spec.value}</p>
@@ -131,17 +123,14 @@ export default function SprzętPage() {
               Zobacz modele, które możesz wynająć w abonamencie. Wszystkie urządzenia przechodzą kontrolę jakości przed wysyłką.
             </p>
           </div>
-          <div className="grid grid-cols-3 overflow-hidden rounded-lg border border-white/12 bg-white/8">
-            {[
-              ['45+', 'laptopów'],
-              ['10+', 'PC'],
-              ['20+', 'monitorów'],
-            ].map(([num, label]) => (
-              <div key={label} className="border-l border-white/10 p-4 first:border-l-0">
-                <p className="text-3xl font-black text-[#dff2b8]">{num}</p>
-                <p className="mt-1 text-xs font-bold uppercase tracking-wider text-[#f4f9ed]/55">{label}</p>
-              </div>
-            ))}
+          <div className="rounded-lg border border-white/12 bg-white/8 p-5 backdrop-blur">
+            <p className="text-sm font-black uppercase tracking-widest text-[#dff2b8]">W ofercie</p>
+            <p className="mt-3 text-lg font-black leading-7 text-white">
+              Laptopy, komputery PC, monitory, biurka i fotele
+            </p>
+            <p className="mt-3 text-sm leading-6 text-[#f4f9ed]/65">
+              Dostępność konkretnych modeli potwierdzimy przy przygotowaniu oferty.
+            </p>
           </div>
         </div>
       </section>
@@ -159,7 +148,7 @@ export default function SprzętPage() {
                   : 'border-[#102018]/12 bg-white text-gray-600 hover:border-[#7DB122]/70 hover:text-gray-950'
               }`}
             >
-              {categoryLabels[cat]} <span className="opacity-70">({categoryCounts[cat]})</span>
+              {categoryLabels[cat]}
             </button>
           ))}
         </div>

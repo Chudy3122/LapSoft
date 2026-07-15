@@ -14,7 +14,7 @@ const equipmentCategoryLabels: Record<EquipmentCategory, string> = {
   pc: 'Komputer PC',
   monitor: 'Monitor',
   biurko: 'Biurko',
-  krzeslo: 'Krzesło',
+  fotel: 'Fotel',
 }
 
 const packageEquipmentCategories: Record<string, EquipmentCategory[]> = {
@@ -28,7 +28,7 @@ const defaultEquipmentByCategory: Record<EquipmentCategory, string> = {
   pc: equipment.find(item => item.category === 'pc')?.id ?? '',
   monitor: equipment.find(item => item.category === 'monitor')?.id ?? '',
   biurko: equipment.find(item => item.category === 'biurko')?.id ?? '',
-  krzeslo: equipment.find(item => item.category === 'krzeslo')?.id ?? '',
+  fotel: equipment.find(item => item.category === 'fotel')?.id ?? '',
 }
 
 export default function PakietyPage() {
@@ -88,6 +88,12 @@ export default function PakietyPage() {
   selectedEquipmentItems.forEach(item => {
     contactQuery.append('equipment', item.id)
   })
+  selectedAddons.forEach(id => {
+    contactQuery.append('addon', id)
+  })
+  if (withBuyout) {
+    contactQuery.set('buyout', '1')
+  }
 
   return (
     <div className="bg-[#f6f8f5]">
@@ -203,6 +209,7 @@ export default function PakietyPage() {
                                 alt={`${item.brand} ${item.model}`}
                                 fill
                                 sizes="(max-width: 640px) 90vw, (max-width: 1280px) 40vw, 220px"
+                                loading="eager"
                                 unoptimized
                                 className="object-contain p-5"
                               />

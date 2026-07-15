@@ -12,9 +12,19 @@ const contactFlow = [
   ['03', 'Dostajesz propozycję', 'Przygotujemy ofertę z miesięczną ratą. Dopiero wtedy decydujesz, czy chcesz iść dalej.'],
 ]
 
+type SubmissionResult = {
+  id: string
+  linkedToAccount: boolean
+}
+
 function KontaktForm() {
   const searchParams = useSearchParams()
+  const contactQuery = searchParams.toString()
+  const contactRedirectTo = contactQuery ? `/kontakt?${contactQuery}` : '/kontakt'
+  const loginHref = `/logowanie?redirectTo=${encodeURIComponent(contactRedirectTo)}`
+  const registerHref = `/rejestracja?redirectTo=${encodeURIComponent(contactRedirectTo)}`
   const initialEquipmentIds = searchParams.getAll('equipment')
+  const initialAddonIds = searchParams.getAll('addon')
   const [form, setForm] = useState({
     name: '',
     phone: '',
@@ -23,11 +33,12 @@ function KontaktForm() {
     packageId: searchParams.get('package') || 'laptop-monitor',
     period: searchParams.get('period') || '12',
     equipmentIds: initialEquipmentIds,
-    addons: [] as string[],
-    buyout: false,
+    addons: initialAddonIds,
+    buyout: searchParams.get('buyout') === '1',
     message: '',
   })
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle')
+  const [submission, setSubmission] = useState<SubmissionResult | null>(null)
 
   const pkg = packages.find(p => p.id === form.packageId)
   const basePrice = pkg ? pkg.prices[form.period as '6' | '12' | '24'] : 0
@@ -38,7 +49,10 @@ function KontaktForm() {
     .map(id => equipment.find(item => item.id === id))
     .filter(Boolean) as typeof equipment
   const addonsTotal = selectedAddonItems.reduce((sum, addon) => sum + addon.price, 0)
-  const total = basePrice + addonsTotal
+  const buyoutMonthly = form.buyout && pkg
+    ? Math.ceil(pkg.buyoutPrices[form.period as '6' | '12' | '24'] / Number(form.period))
+    : 0
+  const total = basePrice + addonsTotal + buyoutMonthly
 
   const set = (field: string, value: string | boolean | string[]) =>
     setForm(prev => ({ ...prev, [field]: value }))
@@ -55,7 +69,12 @@ function KontaktForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, monthlyTotal: total }),
       })
-      if (!res.ok) throw new Error()
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error()
+      setSubmission({
+        id: String(data.id),
+        linkedToAccount: Boolean(data.linkedToAccount),
+      })
       setStatus('success')
     } catch {
       setStatus('error')
@@ -64,20 +83,53 @@ function KontaktForm() {
 
   if (status === 'success') {
     return (
-      <div className="mx-auto max-w-xl px-5 py-20 text-center sm:px-6">
-        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[#6f9f1f] text-3xl font-black text-white">
-          ✓
+      <div className="mx-auto max-w-3xl px-5 py-20 sm:px-6">
+        <div className="rounded-lg border border-[#102018]/10 bg-white p-6 text-center shadow-sm md:p-8">
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[#6f9f1f] text-3xl font-black text-white">
+            ✓
+          </div>
+          <p className="text-xs font-black uppercase tracking-widest text-[#5f8818]">Zapytanie wysłane</p>
+          <h2 className="mt-2 text-4xl font-black tracking-tight text-gray-950">Dziękujemy, mamy Twoją konfigurację</h2>
+          <p className="mt-4 text-lg leading-8 text-gray-600">
+            Skontaktujemy się w ciągu <strong>24 godzin</strong>, żeby potwierdzić potrzeby, sprawdzić dostępność sprzętu i odpowiedzieć na pytania.
+          </p>
+
+          <div className="mt-6 grid gap-3 text-left sm:grid-cols-3">
+            {[
+              ['1', 'Sprawdzamy zestaw', 'Porównamy wybrane elementy z dostępnością i zastosowaniem.'],
+              ['2', 'Oddzwaniamy', 'Doprecyzujemy szczegóły i ewentualne zmiany w konfiguracji.'],
+              ['3', 'Wysyłamy ofertę', 'Dopiero po rozmowie decydujesz, czy chcesz iść dalej.'],
+            ].map(([num, title, desc]) => (
+              <div key={title} className="rounded-lg bg-[#f6f8f5] p-4">
+                <p className="text-sm font-black text-[#5f8818]">{num}</p>
+                <p className="mt-2 font-black text-gray-950">{title}</p>
+                <p className="mt-1 text-sm leading-6 text-gray-500">{desc}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-6 rounded-lg border border-[#7DB122]/25 bg-[#eef8dd] px-5 py-4 text-left">
+            <p className="font-black text-gray-950">To nadal nie jest zamówienie ani umowa.</p>
+            <p className="mt-1 text-sm font-semibold leading-6 text-[#456c12]">
+              Numer zapytania: <span className="font-black">{submission?.id ?? 'nadany'}</span>. Decyzję podejmujesz dopiero po rozmowie i otrzymaniu konkretnej propozycji.
+            </p>
+          </div>
+
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
+            {submission?.linkedToAccount ? (
+              <Link href="/panel-klienta" className="rounded-md bg-[#6f9f1f] px-8 py-4 text-base font-black text-white transition-colors hover:bg-[#5f8818]">
+                Przejdź do panelu klienta
+              </Link>
+            ) : (
+              <Link href="/rejestracja" className="rounded-md bg-[#6f9f1f] px-8 py-4 text-base font-black text-white transition-colors hover:bg-[#5f8818]">
+                Załóż konto na przyszłość
+              </Link>
+            )}
+            <Link href="/pakiety" className="rounded-md border border-[#102018]/15 bg-white px-8 py-4 text-base font-black text-gray-950 transition-colors hover:border-[#7DB122]/60 hover:text-[#5f8818]">
+              Wróć do konfiguratora
+            </Link>
+          </div>
         </div>
-        <h2 className="text-4xl font-black tracking-tight text-gray-950">Dziękujemy!</h2>
-        <p className="mt-4 text-lg leading-8 text-gray-600">
-          Zapytanie zostało wysłane. Skontaktujemy się z Tobą w ciągu <strong>24 godzin</strong>, żeby spokojnie potwierdzić potrzeby i odpowiedzieć na pytania.
-        </p>
-        <p className="mt-3 rounded-lg bg-[#eef8dd] px-5 py-4 text-sm font-bold leading-6 text-[#456c12]">
-          To nadal nie jest zamówienie ani umowa. Decyzję podejmujesz dopiero po rozmowie i otrzymaniu konkretnej propozycji.
-        </p>
-        <Link href="/" className="mt-8 inline-block rounded-md bg-[#6f9f1f] px-8 py-4 text-base font-black text-white transition-colors hover:bg-[#5f8818]">
-          Wróć na stronę główną
-        </Link>
       </div>
     )
   }
@@ -182,6 +234,23 @@ function KontaktForm() {
                   ))}
                 </div>
               </div>
+            )}
+            {selectedAddonItems.length > 0 && (
+              <div className="mt-4">
+                <p className="font-bold text-gray-500">Dodatki z konfiguratora</p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {selectedAddonItems.map(addon => (
+                    <span key={addon.id} className="rounded-md bg-white px-3 py-1.5 text-xs font-black text-gray-700">
+                      {addon.name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            {form.buyout && (
+              <p className="mt-4 rounded-md bg-white px-3 py-2 text-sm font-black text-gray-950">
+                Uwzględniono rozmowę o wykupie sprzętu po abonamencie.
+              </p>
             )}
             <p className="mt-4 text-xs font-semibold leading-5 text-[#456c12]">
               Możesz zmienić wybór podczas rozmowy. Potraktujemy to jako punkt startowy do przygotowania oferty.
@@ -295,6 +364,35 @@ function KontaktForm() {
                 </div>
               </div>
             )}
+            {form.buyout && (
+              <div className="flex justify-between gap-4 text-[#f4f9ed]/70">
+                <span>Wykup sprzętu</span>
+                <span className="font-black text-white">+{buyoutMonthly} zł</span>
+              </div>
+            )}
+          </div>
+          <div className="mb-4 rounded-lg border border-white/10 bg-white/[0.04] p-4 text-sm leading-6 text-[#f4f9ed]/65">
+            Zapytanie pojawi się w panelu klienta, jeśli wyślesz formularz jako zalogowany użytkownik. Bez logowania nadal je otrzymamy i skontaktujemy się telefonicznie.
+          </div>
+          <div className="mb-4 rounded-lg border border-[#7DB122]/25 bg-[#7DB122]/10 p-4">
+            <p className="font-black text-[#dff2b8]">Chcesz widzieć zapytanie w panelu klienta?</p>
+            <p className="mt-1 text-sm leading-6 text-[#f4f9ed]/65">
+              Zaloguj się albo załóż konto przed wysłaniem formularza. Po powrocie konfiguracja zostanie zachowana.
+            </p>
+            <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+              <Link
+                href={loginHref}
+                className="rounded-md bg-white px-4 py-2 text-center text-xs font-black uppercase text-[#102018] transition-colors hover:bg-[#dff2b8]"
+              >
+                Zaloguj się
+              </Link>
+              <Link
+                href={registerHref}
+                className="rounded-md border border-white/15 px-4 py-2 text-center text-xs font-black uppercase text-white transition-colors hover:border-[#dff2b8] hover:text-[#dff2b8]"
+              >
+                Załóż konto
+              </Link>
+            </div>
           </div>
           <button
             type="submit"

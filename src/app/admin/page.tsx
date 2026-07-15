@@ -20,7 +20,6 @@ export default function AdminLoginPage() {
     })
 
     if (res.ok) {
-      sessionStorage.setItem('lapsoft-admin', '1')
       router.push('/admin/dashboard')
     } else {
       setError(true)

@@ -14,7 +14,7 @@ const categoryLabels = {
   pc: 'Komputer PC',
   monitor: 'Monitor',
   biurko: 'Biurko',
-  krzeslo: 'Krzesło',
+  fotel: 'Fotel',
 } as const
 
 function getEquipment(id: string) {
@@ -141,7 +141,7 @@ export default async function EquipmentDetailsPage({
               {item.specs.map(spec => (
                 <div key={spec.label} className="rounded-md border border-[#102018]/8 bg-[#f6f8f5] px-4 py-3">
                   <p className="text-xs font-bold uppercase text-gray-400">{spec.label}</p>
-                  <p className="mt-1 text-base font-black text-gray-800">{spec.value}</p>
+                  <p className="mt-1 whitespace-pre-line text-base font-black text-gray-800">{spec.value}</p>
                 </div>
               ))}
             </div>

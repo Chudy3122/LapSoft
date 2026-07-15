@@ -7,11 +7,32 @@ import { prisma } from '@/lib/prisma'
 import { createSession, deleteSession } from '@/lib/session'
 import { RegisterSchema, LoginSchema, type AuthFormState } from '@/lib/validation'
 
+function getSafeRedirectTo(formData: FormData, fallback: string) {
+  const value = formData.get('redirectTo')
+  if (typeof value !== 'string' || !value.startsWith('/') || value.startsWith('//')) {
+    return fallback
+  }
+
+  try {
+    const url = new URL(value, 'https://lapsoft.local')
+    const blockedPaths = ['/admin', '/api', '/logowanie', '/rejestracja']
+
+    if (url.origin !== 'https://lapsoft.local' || blockedPaths.some(path => url.pathname.startsWith(path))) {
+      return fallback
+    }
+
+    return `${url.pathname}${url.search}${url.hash}`
+  } catch {
+    return fallback
+  }
+}
+
 // --- Rejestracja ---
 export async function register(
   _state: AuthFormState,
   formData: FormData
 ): Promise<AuthFormState> {
+  const redirectTo = getSafeRedirectTo(formData, '/panel-klienta')
   const parsed = RegisterSchema.safeParse({
     name: formData.get('name'),
     email: formData.get('email'),
@@ -45,7 +66,7 @@ export async function register(
 
   void userId
   revalidatePath('/', 'layout')
-  redirect('/panel-klienta')
+  redirect(redirectTo)
 }
 
 // --- Logowanie ---
@@ -53,6 +74,7 @@ export async function login(
   _state: AuthFormState,
   formData: FormData
 ): Promise<AuthFormState> {
+  const redirectTo = getSafeRedirectTo(formData, '/panel-klienta')
   const parsed = LoginSchema.safeParse({
     email: formData.get('email'),
     password: formData.get('password'),
@@ -85,7 +107,7 @@ export async function login(
   })
 
   revalidatePath('/', 'layout')
-  redirect(user.role === 'ADMIN' ? '/admin/dashboard' : '/panel-klienta')
+  redirect(user.role === 'ADMIN' ? '/admin/dashboard' : redirectTo)
 }
 
 // --- Wylogowanie ---

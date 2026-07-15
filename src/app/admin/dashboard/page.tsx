@@ -36,15 +36,18 @@ export default function AdminDashboard() {
   const [filter, setFilter] = useState<Status | 'all'>('all')
 
   useEffect(() => {
-    if (!sessionStorage.getItem('lapsoft-admin')) router.replace('/admin')
-  }, [router])
-
-  useEffect(() => {
     let ignore = false
 
     async function loadInquiries() {
       const res = await fetch('/api/admin/inquiries')
-      if (!ignore && res.ok) setInquiries(await res.json())
+      if (ignore) return
+
+      if (res.status === 403) {
+        router.replace('/admin')
+        return
+      }
+
+      if (res.ok) setInquiries(await res.json())
       if (!ignore) setLoading(false)
     }
 
@@ -53,22 +56,28 @@ export default function AdminDashboard() {
     return () => {
       ignore = true
     }
-  }, [])
+  }, [router])
 
   async function updateStatus(id: string, status: Status) {
-    await fetch(`/api/admin/inquiries/${id}`, {
+    const res = await fetch(`/api/admin/inquiries/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status }),
     })
+    if (res.status === 403) {
+      router.replace('/admin')
+      return
+    }
+    if (!res.ok) return
+
     setInquiries(prev => prev.map(i => i.id === id ? { ...i, status } : i))
     if (selected?.id === id) setSelected(prev => prev ? { ...prev, status } : null)
   }
 
   async function logout() {
-    sessionStorage.removeItem('lapsoft-admin')
     await fetch('/api/admin/login', { method: 'DELETE' })
     router.push('/admin')
+    router.refresh()
   }
 
   const filtered = filter === 'all' ? inquiries : inquiries.filter(i => i.status === filter)

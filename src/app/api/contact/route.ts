@@ -28,7 +28,11 @@ export async function POST(req: NextRequest) {
       userId: session?.role === 'USER' ? session.userId : null,
     })
 
-    return NextResponse.json({ success: true, id: inquiry.id })
+    return NextResponse.json({
+      success: true,
+      id: inquiry.id,
+      linkedToAccount: session?.role === 'USER',
+    })
   } catch {
     return NextResponse.json({ error: 'Błąd serwera' }, { status: 500 })
   }

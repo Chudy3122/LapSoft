@@ -35,6 +35,11 @@ export async function proxy(req: NextRequest) {
     return NextResponse.redirect(new URL('/admin', req.url))
   }
 
+  // Zalogowanego administratora nie pokazuj ponownie formularza logowania admina
+  if (pathname === '/admin' && session?.role === 'ADMIN') {
+    return NextResponse.redirect(new URL('/admin/dashboard', req.url))
+  }
+
   // Zalogowanego użytkownika przekieruj ze stron logowania/rejestracji do panelu
   if ((pathname === '/logowanie' || pathname === '/rejestracja') && session?.userId) {
     const dest = session.role === 'ADMIN' ? '/admin/dashboard' : '/panel-klienta'
@@ -45,5 +50,5 @@ export async function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/panel-klienta/:path*', '/admin/dashboard/:path*', '/logowanie', '/rejestracja'],
+  matcher: ['/panel-klienta/:path*', '/admin', '/admin/dashboard/:path*', '/logowanie', '/rejestracja'],
 }
