@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { equipment } from '@/data/equipment'
 import { packages } from '@/data/packages'
 import { softwareAddons } from '@/data/software'
+import { logout } from '@/app/actions/auth'
 import type { Inquiry } from '@/lib/storage'
 
 type Status = Inquiry['status']
@@ -43,7 +44,7 @@ export default function AdminDashboard() {
       if (ignore) return
 
       if (res.status === 403) {
-        router.replace('/admin')
+        router.replace('/logowanie')
         return
       }
 
@@ -65,19 +66,13 @@ export default function AdminDashboard() {
       body: JSON.stringify({ status }),
     })
     if (res.status === 403) {
-      router.replace('/admin')
+      router.replace('/logowanie')
       return
     }
     if (!res.ok) return
 
     setInquiries(prev => prev.map(i => i.id === id ? { ...i, status } : i))
     if (selected?.id === id) setSelected(prev => prev ? { ...prev, status } : null)
-  }
-
-  async function logout() {
-    await fetch('/api/admin/login', { method: 'DELETE' })
-    router.push('/admin')
-    router.refresh()
   }
 
   const filtered = filter === 'all' ? inquiries : inquiries.filter(i => i.status === filter)
@@ -99,9 +94,11 @@ export default function AdminDashboard() {
               <p className="text-xs font-black uppercase tracking-widest text-gray-400">Panel admina</p>
             </div>
           </div>
-          <button onClick={logout} className="rounded-md border border-[#102018]/10 bg-white px-4 py-2 text-xs font-black uppercase tracking-wider text-gray-600 transition-colors hover:border-red-300 hover:text-red-500">
-            Wyloguj
-          </button>
+          <form action={logout}>
+            <button type="submit" className="rounded-md border border-[#102018]/10 bg-white px-4 py-2 text-xs font-black uppercase tracking-wider text-gray-600 transition-colors hover:border-red-300 hover:text-red-500">
+              Wyloguj
+            </button>
+          </form>
         </div>
       </header>
 

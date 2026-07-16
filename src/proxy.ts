@@ -30,9 +30,9 @@ export async function proxy(req: NextRequest) {
     return NextResponse.redirect(new URL('/logowanie', req.url))
   }
 
-  // Panel admina — wymaga roli ADMIN
+  // Panel admina — wymaga roli ADMIN (logowanie zwykłym kontem z rolą ADMIN)
   if (pathname.startsWith('/admin/dashboard') && session?.role !== 'ADMIN') {
-    return NextResponse.redirect(new URL('/admin', req.url))
+    return NextResponse.redirect(new URL('/logowanie', req.url))
   }
 
   // Zalogowanego administratora nie pokazuj ponownie formularza logowania admina
