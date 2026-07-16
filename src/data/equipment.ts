@@ -7,6 +7,7 @@ export interface Equipment {
   cardImage: string
   specs: { label: string; value: string }[]
   cardSpecs?: { label: string; value: string }[]
+  monthlyPrice?: number
   units: number
   description: string
 }
@@ -248,6 +249,7 @@ export const equipment: Equipment[] = [
     image: '/images/sprzet/biurko-sense7.webp',
     cardImage: '/images/sprzet/cards/biurko-sense7-card.webp',
     units: 60,
+    monthlyPrice: 59,
     description: 'Solidne, mobilne biurko do domowego biura. Stabilny blat i wygodna przestrzeń robocza — idealne uzupełnienie zestawu komputerowego.',
     specs: [
       { label: 'Typ', value: 'Biurko elektryczne' },
@@ -264,6 +266,7 @@ export const equipment: Equipment[] = [
     image: '/images/sprzet/fotel-alfordson.webp',
     cardImage: '/images/sprzet/cards/fotel-alfordson-card.webp',
     units: 67,
+    monthlyPrice: 39,
     description: 'Ergonomiczny fotel biurowy z podparciem lędźwiowym. Komfort podczas długiej pracy przy komputerze i regulacja dopasowana do użytkownika.',
     specs: [
       { label: 'Typ', value: 'Fotel biurowy' },

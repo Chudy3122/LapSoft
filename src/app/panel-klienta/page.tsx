@@ -102,12 +102,25 @@ export default async function PanelKlientaPage() {
         </div>
 
         {inquiries.length === 0 ? (
-          <div className="rounded-lg border border-[#102018]/10 bg-white py-20 text-center shadow-sm">
+          <div className="rounded-lg border border-[#102018]/10 bg-white p-8 text-center shadow-sm md:p-12">
             <p className="text-lg font-black text-gray-950">Nie masz jeszcze żadnych zapytań</p>
-            <p className="mt-2 text-sm text-gray-500">Skonfiguruj swój zestaw w konfiguratorze — pojawi się tutaj.</p>
-            <Link href="/pakiety" className="mt-5 inline-block rounded-md bg-[#6f9f1f] px-6 py-3 text-sm font-black uppercase text-white transition-colors hover:bg-[#5f8818]">
-              Przejdź do konfiguratora
-            </Link>
+            <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-gray-500">
+              Skonfiguruj zestaw i wyślij formularz jako zalogowany użytkownik. Wtedy zapytanie pojawi się tutaj razem ze statusem i szczegółami.
+            </p>
+            <div className="mx-auto mt-5 max-w-xl rounded-lg border border-[#7DB122]/25 bg-[#eef8dd] p-4 text-left">
+              <p className="text-sm font-black text-gray-950">Warto wiedzieć</p>
+              <p className="mt-1 text-sm leading-6 text-gray-600">
+                Zapytania wysłane wcześniej bez logowania nadal są obsługiwane, ale nie pojawią się automatycznie w tym panelu.
+              </p>
+            </div>
+            <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+              <Link href="/pakiety" className="rounded-md bg-[#6f9f1f] px-6 py-3 text-sm font-black uppercase text-white transition-colors hover:bg-[#5f8818]">
+                Przejdź do konfiguratora
+              </Link>
+              <Link href="/kontakt" className="rounded-md border border-[#102018]/15 bg-white px-6 py-3 text-sm font-black uppercase text-gray-950 transition-colors hover:border-[#7DB122]/60 hover:text-[#5f8818]">
+                Zapytaj o pomoc
+              </Link>
+            </div>
           </div>
         ) : (
           <div className="grid gap-5">

@@ -23,6 +23,8 @@ const packageEquipmentCategories: Record<string, EquipmentCategory[]> = {
   'pc-monitor': ['pc', 'monitor'],
 }
 
+const extraEquipmentCategories: EquipmentCategory[] = ['biurko', 'fotel']
+
 const defaultEquipmentByCategory: Record<EquipmentCategory, string> = {
   laptop: equipment.find(item => item.category === 'laptop')?.id ?? '',
   pc: equipment.find(item => item.category === 'pc')?.id ?? '',
@@ -36,6 +38,7 @@ export default function PakietyPage() {
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodKey>('12')
   const [selectedAddons, setSelectedAddons] = useState<string[]>([])
   const [selectedEquipmentByCategory, setSelectedEquipmentByCategory] = useState<Record<EquipmentCategory, string>>(defaultEquipmentByCategory)
+  const [selectedExtraEquipment, setSelectedExtraEquipment] = useState<string[]>([])
   const [withBuyout, setWithBuyout] = useState(false)
   const [inventory, setInventory] = useState<InventoryMap | null>(null)
 
@@ -60,14 +63,19 @@ export default function PakietyPage() {
   const selectedEquipmentItems = requiredEquipmentCategories
     .map(category => equipment.find(item => item.id === selectedEquipmentByCategory[category]))
     .filter(Boolean) as Equipment[]
+  const extraEquipment = liveEquipment.filter(item => extraEquipmentCategories.includes(item.category))
+  const selectedExtraEquipmentItems = selectedExtraEquipment
+    .map(id => liveEquipment.find(item => item.id === id))
+    .filter(Boolean) as Equipment[]
   const basePrice = pkg.prices[selectedPeriod]
+  const extraEquipmentTotal = selectedExtraEquipmentItems.reduce((sum, item) => sum + (item.monthlyPrice ?? 0), 0)
   const addonsTotal = selectedAddons.reduce((sum, id) => {
     return sum + (softwareAddons.find(a => a.id === id)?.price ?? 0)
   }, 0)
   const buyoutMonthly = withBuyout
     ? Math.ceil(pkg.buyoutPrices[selectedPeriod] / Number(selectedPeriod))
     : 0
-  const totalMonthly = basePrice + addonsTotal + buyoutMonthly
+  const totalMonthly = basePrice + extraEquipmentTotal + addonsTotal + buyoutMonthly
   const totalContract = totalMonthly * Number(selectedPeriod)
   const periodLabel = periods.find(p => p.key === selectedPeriod)?.label ?? ''
 
@@ -80,12 +88,20 @@ export default function PakietyPage() {
       prev.includes(id) ? prev.filter(a => a !== id) : [...prev, id]
     )
 
+  const toggleExtraEquipment = (id: string) =>
+    setSelectedExtraEquipment(prev =>
+      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+    )
+
   const contactQuery = new URLSearchParams({
     package: selectedPackage,
     period: selectedPeriod,
   })
 
   selectedEquipmentItems.forEach(item => {
+    contactQuery.append('equipment', item.id)
+  })
+  selectedExtraEquipmentItems.forEach(item => {
     contactQuery.append('equipment', item.id)
   })
   selectedAddons.forEach(id => {
@@ -240,6 +256,62 @@ export default function PakietyPage() {
 
           <section className="rounded-lg border border-[#102018]/10 bg-white p-5 shadow-sm md:p-6">
             <p className="text-xs font-black uppercase tracking-widest text-[#5f8818]">Krok 3</p>
+            <h2 className="mt-1 text-2xl font-black tracking-tight text-gray-950">Dobierz dodatkowe wyposażenie</h2>
+            <p className="mt-2 text-sm leading-6 text-gray-500">
+              Opcjonalnie możesz dodać do zestawu biurko albo fotel. Ceny są tymczasowe i będzie można je później łatwo zmienić.
+            </p>
+
+            <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {extraEquipment.map(item => {
+                const active = selectedExtraEquipment.includes(item.id)
+
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => toggleExtraEquipment(item.id)}
+                    className={`flex min-h-[190px] overflow-hidden rounded-lg border-2 text-left transition-colors ${
+                      active
+                        ? 'border-[#7DB122] bg-[#eef8dd]'
+                        : 'border-gray-200 bg-white hover:border-[#7DB122]/60'
+                    }`}
+                  >
+                    <div className="relative hidden w-36 shrink-0 bg-white sm:block">
+                      <Image
+                        src={item.cardImage}
+                        alt={`${item.brand} ${item.model}`}
+                        fill
+                        sizes="144px"
+                        loading="lazy"
+                        unoptimized
+                        className="object-contain p-4"
+                      />
+                    </div>
+                    <div className="flex flex-1 flex-col p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-xs font-black uppercase tracking-widest text-[#5f8818]">{equipmentCategoryLabels[item.category]}</p>
+                          <p className="mt-1 text-lg font-black tracking-tight text-gray-950">{item.brand} {item.model}</p>
+                        </div>
+                        <span className={`mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 text-xs font-black ${
+                          active ? 'border-[#6f9f1f] bg-[#6f9f1f] text-white' : 'border-gray-300 text-transparent'
+                        }`}>
+                          ✓
+                        </span>
+                      </div>
+                      <p className="mt-3 line-clamp-2 text-sm leading-6 text-gray-500">{item.description}</p>
+                      <p className="mt-auto pt-3 text-xl font-black text-[#5f8818]">
+                        +{item.monthlyPrice ?? 0}<span className="text-sm font-bold text-gray-500"> zł/mies.</span>
+                      </p>
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+          </section>
+
+          <section className="rounded-lg border border-[#102018]/10 bg-white p-5 shadow-sm md:p-6">
+            <p className="text-xs font-black uppercase tracking-widest text-[#5f8818]">Krok 4</p>
             <h2 className="mt-1 text-2xl font-black tracking-tight text-gray-950">Okres abonamentu</h2>
             <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
               {periods.map(p => {
@@ -267,7 +339,7 @@ export default function PakietyPage() {
           </section>
 
           <section className="rounded-lg border border-[#102018]/10 bg-white p-5 shadow-sm md:p-6">
-            <p className="text-xs font-black uppercase tracking-widest text-[#5f8818]">Krok 4</p>
+            <p className="text-xs font-black uppercase tracking-widest text-[#5f8818]">Krok 5</p>
             <h2 className="mt-1 text-2xl font-black tracking-tight text-gray-950">Oprogramowanie i usługi</h2>
             <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
               {softwareAddons.map(addon => {
@@ -312,7 +384,7 @@ export default function PakietyPage() {
           </section>
 
           <section className="rounded-lg border border-[#102018]/10 bg-white p-5 shadow-sm md:p-6">
-            <p className="text-xs font-black uppercase tracking-widest text-[#5f8818]">Krok 5</p>
+            <p className="text-xs font-black uppercase tracking-widest text-[#5f8818]">Krok 6</p>
             <h2 className="mt-1 text-2xl font-black tracking-tight text-gray-950">Opcja wykupu sprzętu</h2>
             <button
               type="button"
@@ -365,6 +437,19 @@ export default function PakietyPage() {
                   ))}
                 </div>
               </div>
+              {selectedExtraEquipmentItems.length > 0 && (
+                <div className="rounded-lg border border-white/10 bg-white/[0.04] p-3">
+                  <p className="mb-2 text-xs font-black uppercase tracking-widest text-[#dff2b8]">Dodatkowe wyposażenie</p>
+                  <div className="space-y-1.5">
+                    {selectedExtraEquipmentItems.map(item => (
+                      <div key={item.id} className="flex justify-between gap-4 text-[#f4f9ed]/70">
+                        <span>{item.brand} {item.model}</span>
+                        <span className="font-black text-white">+{item.monthlyPrice ?? 0} zł</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
               {selectedAddonItems.map(addon => (
                 <div key={addon.id} className="flex justify-between gap-4 text-[#f4f9ed]/70">
                   <span>{addon.name}</span>
