@@ -262,7 +262,7 @@ export default function HomePage() {
             <p className="mb-3 text-sm font-black uppercase tracking-widest text-[#5f8818]">Dlaczego LapSoft</p>
             <h2 className="text-4xl font-black tracking-tight text-gray-950 md:text-5xl">Mniej formalności, więcej pewności.</h2>
             <p className="mt-4 text-lg leading-8 text-gray-600">
-              Strona ma prowadzić użytkownika do jasnej decyzji: jaki sprzęt, na jaki okres i z jakim wsparciem. Dlatego oferta jest czytelna, a najważniejsze koszty widoczne od razu.
+              Strona ma prowadzić użytkownika do jasnej decyzji: jaki sprzęt, na jaki okres i z jakim wsparciem. Dlatego oferta jest czytelna, a najważniejsze koszty widoczne są od razu.
             </p>
           </div>
 
