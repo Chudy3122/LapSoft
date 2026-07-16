@@ -62,14 +62,14 @@ export default function HomePage() {
     <div className="overflow-hidden">
       <section className="relative isolate overflow-hidden bg-[#102018] text-white">
         <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_18%_20%,rgba(125,177,34,0.24),transparent_34%),radial-gradient(circle_at_82%_12%,rgba(223,242,184,0.14),transparent_26%),linear-gradient(135deg,#15281f_0%,#1c3122_48%,#0e1913_100%)]" />
-        <div className="absolute inset-x-0 bottom-0 -z-10 h-20 bg-gradient-to-t from-[#102018]/85 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 -z-10 h-20 bg-linear-to-t from-[#102018]/85 to-transparent" />
         <div className="hero-electric-lines pointer-events-none -z-10" aria-hidden="true" />
 
         <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-5 py-12 sm:px-6 lg:grid-cols-[1fr_0.9fr] lg:py-16">
           <div>
             <div className="mb-5 inline-flex items-center gap-2 rounded-md border border-[#7DB122]/30 bg-white/10 px-3 py-2 text-sm font-bold text-[#f4f9ed] shadow-sm backdrop-blur">
               <span className="h-2 w-2 rounded-full bg-[#7DB122]" />
-              Wynajem sprzętu komputerowego
+              Wynajem sprzętu komputerowego i biurowego
             </div>
 
             <h1 className="max-w-3xl text-5xl font-black leading-[1.02] tracking-tight text-white md:text-6xl">
@@ -98,7 +98,7 @@ export default function HomePage() {
 
             <div className="mt-8 grid max-w-2xl grid-cols-1 gap-2 rounded-lg border border-white/12 bg-[#0d1712]/55 p-3 text-sm text-[#f4f9ed]/80 shadow-xl shadow-black/10 backdrop-blur sm:grid-cols-2 lg:grid-cols-4">
               {trustItems.map(item => (
-                <div key={item} className="rounded-md border border-white/8 bg-white/[0.04] px-3 py-2 font-semibold leading-snug">
+                <div key={item} className="rounded-md border border-white/8 bg-white/4 px-3 py-2 font-semibold leading-snug">
                   <span className="mb-2 block h-1 w-8 rounded-full bg-[#7DB122]" />
                   {item}
                 </div>
@@ -119,10 +119,10 @@ export default function HomePage() {
                 <p className="rounded-md bg-[#eef8dd] px-3 py-1 text-sm font-black text-[#5f8818]">od 179 zł/mies.</p>
               </div>
 
-              <div className="relative min-h-[250px] overflow-hidden rounded-lg bg-[radial-gradient(circle_at_50%_38%,#ffffff_0%,#eef8dd_48%,#dfe9dc_100%)] p-5">
+              <div className="relative min-h-62.5 overflow-hidden rounded-lg bg-[radial-gradient(circle_at_50%_38%,#ffffff_0%,#eef8dd_48%,#dfe9dc_100%)] p-5">
                 <div className="absolute left-4 top-3 h-40 w-[72%] sm:left-8 sm:h-44 sm:w-[68%]">
                   <Image
-                    src="/images/sprzet/xiaomi-a27i.png"
+                    src="/images/sprzet/xiaomi-a27i.webp"
                     alt="Monitor Xiaomi A27i"
                     fill
                     priority
@@ -131,9 +131,9 @@ export default function HomePage() {
                   />
                 </div>
 
-                <div className="absolute bottom-8 right-2 h-[136px] w-[68%] sm:right-4 sm:h-[152px] sm:w-[62%]">
+                <div className="absolute bottom-8 right-2 h-34 w-[68%] sm:right-4 sm:h-38 sm:w-[62%]">
                   <Image
-                    src="/images/sprzet/dell-vostro-3530.png"
+                    src="/images/sprzet/dell-vostro-3530.webp"
                     alt="Laptop Dell Vostro 15 3530"
                     fill
                     priority
@@ -208,7 +208,7 @@ export default function HomePage() {
               <h2 className="max-w-2xl text-4xl font-black tracking-tight md:text-5xl">Wybierz zestaw, który pasuje do Twojego dnia.</h2>
             </div>
             <Link
-              href="/pakiety"
+              href="/konfigurator"
               className="rounded-md bg-[#6f9f1f] px-6 py-3 text-center text-sm font-black text-white transition-colors hover:bg-[#5f8818]"
             >
               Otwórz konfigurator
@@ -288,10 +288,10 @@ export default function HomePage() {
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link
-                href="/pakiety"
+                href="/konfigurator"
                 className="rounded-md bg-[#6f9f1f] px-7 py-4 text-center text-base font-black text-white transition-colors hover:bg-[#5f8818]"
               >
-                Przejdź do pakietów
+                Przejdź do konfiguratora
               </Link>
               <Link
                 href="/kontakt"

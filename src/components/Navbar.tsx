@@ -1,8 +1,9 @@
 'use client'
+
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { logout } from '@/app/actions/auth'
 
 const links = [
@@ -27,11 +28,28 @@ function UserIcon({ className = '' }: { className?: string }) {
 export default function Navbar({ user }: { user: NavUser }) {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
+  const [accountOpen, setAccountOpen] = useState(false)
+  const accountCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isActive = (href: string) =>
     href === '/' ? pathname === href : pathname.startsWith(href)
-  const accountActive = isActive('/logowanie') || isActive('/panel-klienta') || isActive('/admin')
+  const configuratorActive = isActive('/konfigurator')
+  const loginActive = isActive('/logowanie')
+  const registerActive = isActive('/rejestracja')
+  const accountActive = loginActive || registerActive || isActive('/panel-klienta') || isActive('/admin')
   const panelHref = user?.role === 'ADMIN' ? '/admin/dashboard' : '/panel-klienta'
   const firstName = user?.name?.split(' ')[0] ?? ''
+  const openAccountMenu = () => {
+    if (accountCloseTimer.current) clearTimeout(accountCloseTimer.current)
+    setAccountOpen(true)
+  }
+  const closeAccountMenu = () => {
+    if (accountCloseTimer.current) clearTimeout(accountCloseTimer.current)
+    accountCloseTimer.current = setTimeout(() => setAccountOpen(false), 180)
+  }
+  const toggleAccountMenu = () => {
+    if (accountCloseTimer.current) clearTimeout(accountCloseTimer.current)
+    setAccountOpen(prev => !prev)
+  }
 
   return (
     <nav className="sticky top-0 z-50 border-b border-[#102018]/10 bg-white/90 backdrop-blur-xl">
@@ -49,7 +67,6 @@ export default function Navbar({ user }: { user: NavUser }) {
         </Link>
 
         <div className="hidden items-center md:flex">
-          {/* Strefa nawigacji + główne CTA */}
           <div className="flex items-center gap-2">
             {links.map(l => (
               <Link
@@ -65,53 +82,117 @@ export default function Navbar({ user }: { user: NavUser }) {
               </Link>
             ))}
             <Link
-              href="/pakiety"
-              className="ml-1 rounded-md bg-[#6f9f1f] px-5 py-2.5 text-sm font-black uppercase text-white shadow-sm shadow-[#102018]/15 transition-colors hover:bg-[#5f8818]"
+              href="/konfigurator"
+              className={`ml-1 rounded-md px-5 py-2.5 text-sm font-black uppercase text-white shadow-sm shadow-[#102018]/15 transition-colors ${
+                configuratorActive ? 'bg-[#102018]' : 'bg-[#6f9f1f] hover:bg-[#5f8818]'
+              }`}
             >
               Konfigurator
             </Link>
           </div>
 
-          {/* Separator oddzielający strefę konta */}
           <span className="mx-3 h-7 w-px bg-[#102018]/12" aria-hidden="true" />
 
-          {/* Strefa konta — na maks prawej pozycji */}
-          {user ? (
-            <div className="flex items-center gap-2">
-              <Link
-                href={panelHref}
-                className={`inline-flex items-center gap-2 rounded-md border px-4 py-2.5 text-sm font-black uppercase transition-colors ${
-                  accountActive
-                    ? 'border-[#6f9f1f] bg-[#eef8dd] text-[#4f7414]'
-                    : 'border-[#102018]/15 bg-white text-[#102018] hover:border-[#6f9f1f] hover:bg-[#f6faef] hover:text-[#5f8818]'
-                }`}
-                title={`Zalogowano jako ${user.name}`}
-              >
-                <UserIcon className="h-4 w-4" />
-                {firstName || 'Mój panel'}
-              </Link>
-              <form action={logout}>
-                <button
-                  type="submit"
-                  className="rounded-md px-3 py-2.5 text-sm font-bold uppercase text-gray-500 transition-colors hover:text-red-500"
-                >
-                  Wyloguj
-                </button>
-              </form>
-            </div>
-          ) : (
-            <Link
-              href="/logowanie"
-              className={`inline-flex items-center gap-2 rounded-md border px-4 py-2.5 text-sm font-black uppercase transition-colors ${
-                accountActive
+          <div
+            className="relative"
+            onMouseEnter={openAccountMenu}
+            onMouseLeave={closeAccountMenu}
+          >
+            <button
+              type="button"
+              onClick={toggleAccountMenu}
+              aria-expanded={accountOpen}
+              aria-haspopup="menu"
+              aria-label={user ? `Konto: ${user.name}` : 'Menu konta'}
+              className={`relative flex h-10 w-10 items-center justify-center rounded-md border transition-colors ${
+                accountActive || accountOpen
                   ? 'border-[#6f9f1f] bg-[#eef8dd] text-[#4f7414]'
                   : 'border-[#102018]/15 bg-white text-[#102018] hover:border-[#6f9f1f] hover:bg-[#f6faef] hover:text-[#5f8818]'
               }`}
             >
-              <UserIcon className="h-4 w-4" />
-              Zaloguj
-            </Link>
-          )}
+              <UserIcon className="h-5 w-5" />
+              {user && (
+                <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-[#6f9f1f]" aria-hidden="true" />
+              )}
+            </button>
+
+            {accountOpen && (
+              <div className="absolute right-0 top-12 w-64 overflow-hidden rounded-lg border border-[#102018]/10 bg-white shadow-xl shadow-[#102018]/12" role="menu">
+                {user && (
+                  <div className="border-b border-[#102018]/8 px-4 py-3">
+                    <p className="text-xs font-black uppercase tracking-widest text-gray-400">Konto</p>
+                    <p className="mt-1 truncate text-sm font-black text-gray-950">
+                      {user.name}
+                    </p>
+                    <p className="mt-0.5 text-xs font-semibold text-gray-500">
+                      {user.role === 'ADMIN' ? 'Administrator' : 'Klient'}
+                    </p>
+                  </div>
+                )}
+
+                {user ? (
+                  <div className="p-2">
+                    <Link
+                      href={panelHref}
+                      onClick={() => setAccountOpen(false)}
+                      className="block rounded-md px-3 py-2.5 text-sm font-bold text-gray-700 transition-colors hover:bg-[#f6faef] hover:text-[#5f8818]"
+                    >
+                      {user.role === 'ADMIN' ? 'Panel admina' : 'Panel klienta'}
+                    </Link>
+                    <Link
+                      href={panelHref}
+                      onClick={() => setAccountOpen(false)}
+                      className="block rounded-md px-3 py-2.5 text-sm font-bold text-gray-700 transition-colors hover:bg-[#f6faef] hover:text-[#5f8818]"
+                    >
+                      {user.role === 'ADMIN' ? 'Zapytania klientów' : 'Moje zapytania'}
+                    </Link>
+                    {user.role === 'USER' && (
+                      <Link
+                        href="/konfigurator"
+                        onClick={() => setAccountOpen(false)}
+                        className="block rounded-md px-3 py-2.5 text-sm font-bold text-gray-700 transition-colors hover:bg-[#f6faef] hover:text-[#5f8818]"
+                      >
+                        Nowe zapytanie
+                      </Link>
+                    )}
+                    <form action={logout} className="mt-2 border-t border-[#102018]/8 pt-2">
+                      <button
+                        type="submit"
+                        className="w-full rounded-md px-3 py-2.5 text-left text-sm font-bold text-red-500 transition-colors hover:bg-red-50"
+                      >
+                        Wyloguj się
+                      </button>
+                    </form>
+                  </div>
+                ) : (
+                  <div className="p-2">
+                    <Link
+                      href="/logowanie"
+                      onClick={() => setAccountOpen(false)}
+                      className={`block rounded-md border px-3 py-2.5 text-center text-sm font-bold transition-colors ${
+                        loginActive
+                          ? 'border-[#6f9f1f] bg-[#eef8dd] text-[#4f7414]'
+                          : 'border-[#102018]/12 bg-white text-gray-800 hover:border-[#6f9f1f]/45 hover:bg-[#f6faef] hover:text-[#4f7414]'
+                      }`}
+                    >
+                      Zaloguj się
+                    </Link>
+                    <Link
+                      href="/rejestracja"
+                      onClick={() => setAccountOpen(false)}
+                      className={`mt-1 block rounded-md border px-3 py-2.5 text-center text-sm font-black transition-colors ${
+                        registerActive
+                          ? 'border-[#6f9f1f] bg-[#eef8dd] text-[#4f7414]'
+                          : 'border-[#6f9f1f]/25 bg-[#eef8dd] text-[#4f7414] hover:border-[#6f9f1f]/55 hover:bg-[#dff2b8]'
+                      }`}
+                    >
+                      Załóż konto
+                    </Link>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
         <button
@@ -142,14 +223,15 @@ export default function Navbar({ user }: { user: NavUser }) {
           ))}
 
           <Link
-            href="/pakiety"
+            href="/konfigurator"
             onClick={() => setOpen(false)}
-            className="mt-3 block rounded-md bg-[#6f9f1f] px-5 py-3 text-center text-base font-black uppercase text-white"
+            className={`mt-3 block rounded-md px-5 py-3 text-center text-base font-black uppercase text-white ${
+              configuratorActive ? 'bg-[#102018]' : 'bg-[#6f9f1f]'
+            }`}
           >
             Konfigurator
           </Link>
 
-          {/* Wydzielona strefa konta */}
           <div className="mt-4 border-t border-gray-100 pt-4">
             <p className="mb-2 px-1 text-xs font-black uppercase tracking-widest text-gray-400">Konto</p>
             {user ? (
@@ -162,6 +244,15 @@ export default function Navbar({ user }: { user: NavUser }) {
                   <UserIcon className="h-5 w-5" />
                   {user.role === 'ADMIN' ? 'Panel admina' : 'Mój panel'}
                 </Link>
+                {user.role === 'USER' && (
+                  <Link
+                    href="/konfigurator"
+                    onClick={() => setOpen(false)}
+                    className="block rounded-md border border-[#102018]/15 bg-white px-5 py-3 text-center text-sm font-bold uppercase text-[#102018]"
+                  >
+                    Nowe zapytanie
+                  </Link>
+                )}
                 <form action={logout}>
                   <button
                     type="submit"
@@ -172,18 +263,30 @@ export default function Navbar({ user }: { user: NavUser }) {
                 </form>
               </div>
             ) : (
-              <Link
-                href="/logowanie"
-                onClick={() => setOpen(false)}
-                className={`flex items-center justify-center gap-2 rounded-md border px-5 py-3 text-base font-black uppercase transition-colors ${
-                  accountActive
-                    ? 'border-[#6f9f1f] bg-[#eef8dd] text-[#4f7414]'
-                    : 'border-[#102018]/15 bg-white text-[#102018]'
-                }`}
-              >
-                <UserIcon className="h-5 w-5" />
-                Zaloguj
-              </Link>
+              <div className="space-y-2">
+                <Link
+                  href="/logowanie"
+                  onClick={() => setOpen(false)}
+                  className={`block rounded-md border px-5 py-3 text-center text-sm font-bold uppercase transition-colors ${
+                    loginActive
+                      ? 'border-[#6f9f1f] bg-[#eef8dd] text-[#4f7414]'
+                      : 'border-[#102018]/15 bg-white text-[#102018]'
+                  }`}
+                >
+                  Zaloguj się
+                </Link>
+                <Link
+                  href="/rejestracja"
+                  onClick={() => setOpen(false)}
+                  className={`block rounded-md border px-5 py-3 text-center text-sm font-bold uppercase ${
+                    registerActive
+                      ? 'border-[#6f9f1f] bg-[#eef8dd] text-[#4f7414]'
+                      : 'border-[#102018]/15 bg-white text-[#102018]'
+                  }`}
+                >
+                  Załóż konto
+                </Link>
+              </div>
             )}
           </div>
         </div>

@@ -135,7 +135,7 @@ export function KontaktForm({ isLoggedIn }: KontaktFormProps) {
                 Załóż konto na przyszłość
               </Link>
             )}
-            <Link href="/pakiety" className="rounded-md border border-[#102018]/15 bg-white px-8 py-4 text-base font-black text-gray-950 transition-colors hover:border-[#7DB122]/60 hover:text-[#5f8818]">
+            <Link href="/konfigurator" className="rounded-md border border-[#102018]/15 bg-white px-8 py-4 text-base font-black text-gray-950 transition-colors hover:border-[#7DB122]/60 hover:text-[#5f8818]">
               Wróć do konfiguratora
             </Link>
           </div>

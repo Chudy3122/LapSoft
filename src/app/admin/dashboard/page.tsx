@@ -86,7 +86,7 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-[#f6f8f5]">
       <header className="sticky top-0 z-20 border-b border-[#102018]/10 bg-white/90 backdrop-blur-xl">
-        <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-5 sm:px-6">
+        <div className="mx-auto flex h-18 max-w-7xl items-center justify-between px-5 sm:px-6">
           <div className="flex items-center gap-3">
             <span className="flex h-10 w-10 items-center justify-center rounded-md bg-[#6f9f1f] text-lg font-black text-white">LS</span>
             <div>
@@ -109,7 +109,7 @@ export default function AdminDashboard() {
           <p className="mb-3 text-sm font-black uppercase tracking-widest text-[#dff2b8]">Zapytania klientów</p>
           <div className="grid gap-6 lg:grid-cols-[1fr_360px] lg:items-end">
             <div>
-              <h1 className="text-5xl font-black tracking-tight md:text-6xl">Dashboard</h1>
+              <h1 className="text-5xl font-black tracking-tight md:text-6xl">Panel Administratora</h1>
               <p className="mt-4 max-w-2xl text-lg leading-8 text-[#f4f9ed]/70">
                 Warstwa UI panelu administracyjnego. Logika pobierania zapytań i zmiany statusu bez zmian.
               </p>

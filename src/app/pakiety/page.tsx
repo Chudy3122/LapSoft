@@ -1,497 +1,132 @@
-'use client'
-import { useState, useEffect, useMemo } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
-import { equipment, type Equipment } from '@/data/equipment'
-import { applyInventory, type InventoryMap } from '@/lib/inventory'
-import { packages, periods, type PeriodKey } from '@/data/packages'
-import { softwareAddons } from '@/data/software'
+import { packages } from '@/data/packages'
 
-type EquipmentCategory = Equipment['category']
-
-const equipmentCategoryLabels: Record<EquipmentCategory, string> = {
-  laptop: 'Laptop',
-  pc: 'Komputer PC',
-  monitor: 'Monitor',
-  biurko: 'Biurko',
-  fotel: 'Fotel',
-}
-
-const packageEquipmentCategories: Record<string, EquipmentCategory[]> = {
-  laptop: ['laptop'],
-  'laptop-monitor': ['laptop', 'monitor'],
-  'pc-monitor': ['pc', 'monitor'],
-}
-
-const extraEquipmentCategories: EquipmentCategory[] = ['biurko', 'fotel']
-
-const defaultEquipmentByCategory: Record<EquipmentCategory, string> = {
-  laptop: equipment.find(item => item.category === 'laptop')?.id ?? '',
-  pc: equipment.find(item => item.category === 'pc')?.id ?? '',
-  monitor: equipment.find(item => item.category === 'monitor')?.id ?? '',
-  biurko: equipment.find(item => item.category === 'biurko')?.id ?? '',
-  fotel: equipment.find(item => item.category === 'fotel')?.id ?? '',
-}
+const highlights = [
+  'Dostawa i konfiguracja sprzętu w cenie',
+  'Stała rata miesięczna przez wybrany okres',
+  'Możliwość dobrania biurka, fotela i usług',
+  'Zapytanie bez zobowiązań przed podpisaniem umowy',
+]
 
 export default function PakietyPage() {
-  const [selectedPackage, setSelectedPackage] = useState(packages[1].id)
-  const [selectedPeriod, setSelectedPeriod] = useState<PeriodKey>('12')
-  const [selectedAddons, setSelectedAddons] = useState<string[]>([])
-  const [selectedEquipmentByCategory, setSelectedEquipmentByCategory] = useState<Record<EquipmentCategory, string>>(defaultEquipmentByCategory)
-  const [selectedExtraEquipment, setSelectedExtraEquipment] = useState<string[]>([])
-  const [withBuyout, setWithBuyout] = useState(false)
-  const [inventory, setInventory] = useState<InventoryMap | null>(null)
-
-  // Aktualne dostępności z Google Sheets, odświeżane co 30 s
-  useEffect(() => {
-    let active = true
-    const load = () => {
-      fetch('/api/inventory', { cache: 'no-store' })
-        .then(res => (res.ok ? res.json() : null))
-        .then(data => { if (active && data) setInventory(data) })
-        .catch(() => {})
-    }
-    load()
-    const timer = setInterval(load, 30000)
-    return () => { active = false; clearInterval(timer) }
-  }, [])
-
-  const liveEquipment = useMemo(() => applyInventory(equipment, inventory), [inventory])
-
-  const pkg = packages.find(p => p.id === selectedPackage)!
-  const requiredEquipmentCategories = packageEquipmentCategories[selectedPackage] ?? []
-  const selectedEquipmentItems = requiredEquipmentCategories
-    .map(category => equipment.find(item => item.id === selectedEquipmentByCategory[category]))
-    .filter(Boolean) as Equipment[]
-  const extraEquipment = liveEquipment.filter(item => extraEquipmentCategories.includes(item.category))
-  const selectedExtraEquipmentItems = selectedExtraEquipment
-    .map(id => liveEquipment.find(item => item.id === id))
-    .filter(Boolean) as Equipment[]
-  const basePrice = pkg.prices[selectedPeriod]
-  const extraEquipmentTotal = selectedExtraEquipmentItems.reduce((sum, item) => sum + (item.monthlyPrice ?? 0), 0)
-  const addonsTotal = selectedAddons.reduce((sum, id) => {
-    return sum + (softwareAddons.find(a => a.id === id)?.price ?? 0)
-  }, 0)
-  const buyoutMonthly = withBuyout
-    ? Math.ceil(pkg.buyoutPrices[selectedPeriod] / Number(selectedPeriod))
-    : 0
-  const totalMonthly = basePrice + extraEquipmentTotal + addonsTotal + buyoutMonthly
-  const totalContract = totalMonthly * Number(selectedPeriod)
-  const periodLabel = periods.find(p => p.key === selectedPeriod)?.label ?? ''
-
-  const selectedAddonItems = selectedAddons
-    .map(id => softwareAddons.find(a => a.id === id))
-    .filter(Boolean) as typeof softwareAddons
-
-  const toggleAddon = (id: string) =>
-    setSelectedAddons(prev =>
-      prev.includes(id) ? prev.filter(a => a !== id) : [...prev, id]
-    )
-
-  const toggleExtraEquipment = (id: string) =>
-    setSelectedExtraEquipment(prev =>
-      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
-    )
-
-  const contactQuery = new URLSearchParams({
-    package: selectedPackage,
-    period: selectedPeriod,
-  })
-
-  selectedEquipmentItems.forEach(item => {
-    contactQuery.append('equipment', item.id)
-  })
-  selectedExtraEquipmentItems.forEach(item => {
-    contactQuery.append('equipment', item.id)
-  })
-  selectedAddons.forEach(id => {
-    contactQuery.append('addon', id)
-  })
-  if (withBuyout) {
-    contactQuery.set('buyout', '1')
-  }
-
   return (
     <div className="bg-[#f6f8f5]">
-      <section className="relative isolate overflow-hidden bg-[#102018] px-5 py-14 text-white sm:px-6 lg:py-20">
-        <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_18%_20%,rgba(125,177,34,0.22),transparent_34%),radial-gradient(circle_at_78%_8%,rgba(223,242,184,0.12),transparent_24%),linear-gradient(135deg,#15281f_0%,#1c3122_48%,#0e1913_100%)]" />
+      <section className="relative isolate overflow-hidden bg-[#102018] px-5 py-16 text-white sm:px-6 lg:py-20">
+        <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_18%_20%,rgba(125,177,34,0.22),transparent_34%),radial-gradient(circle_at_82%_12%,rgba(223,242,184,0.12),transparent_26%),linear-gradient(135deg,#15281f_0%,#1c3122_48%,#0e1913_100%)]" />
         <div className="hero-electric-lines pointer-events-none -z-10" aria-hidden="true" />
+
         <div className="mx-auto max-w-6xl">
-          <p className="mb-4 text-sm font-black uppercase tracking-widest text-[#dff2b8]">Konfigurator</p>
-          <div className="grid gap-8 lg:grid-cols-[1fr_0.65fr] lg:items-end">
+          <p className="mb-4 text-sm font-black uppercase tracking-widest text-[#dff2b8]">Pakiety abonamentowe</p>
+          <div className="grid gap-8 lg:grid-cols-[1fr_360px] lg:items-end">
             <div>
-              <h1 className="max-w-3xl text-5xl font-black tracking-tight md:text-6xl">Pakiety i cennik</h1>
-              <p className="mt-5 max-w-2xl text-lg leading-8 text-[#f4f9ed]/75">
-                Wybierz zestaw, okres abonamentu i dodatki. Podsumowanie ceny aktualizuje się od razu, więc możesz spokojnie porównać warianty.
+              <h1 className="max-w-3xl text-5xl font-black tracking-tight md:text-6xl">
+                Wybierz bazę zestawu, a szczegóły dopracuj w konfiguratorze.
+              </h1>
+              <p className="mt-5 max-w-2xl text-lg leading-8 text-[#f4f9ed]/70">
+                Pakiety pokazują punkt startowy abonamentu. Konkretny sprzęt, okres, dodatkowe wyposażenie i usługi wybierzesz w kolejnym kroku.
               </p>
             </div>
+
             <div className="rounded-lg border border-white/12 bg-white/8 p-5 backdrop-blur">
-              <p className="text-sm font-bold text-[#f4f9ed]/65">Najczęstszy wybór</p>
-              <p className="mt-1 text-2xl font-black">Laptop + monitor</p>
-              <p className="mt-2 text-sm leading-6 text-[#f4f9ed]/70">Komfort większego ekranu i mobilność laptopa w jednej miesięcznej racie.</p>
+              <p className="text-sm font-black text-[#dff2b8]">Najważniejsze zasady</p>
+              <ul className="mt-4 space-y-3 text-sm font-semibold leading-6 text-[#f4f9ed]/70">
+                {highlights.map(item => (
+                  <li key={item} className="flex gap-3">
+                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#7DB122]" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         </div>
       </section>
 
-      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 px-5 py-10 sm:px-6 lg:grid-cols-[1fr_360px] lg:py-14">
-        <div className="space-y-5">
-          <section className="rounded-lg border border-[#102018]/10 bg-white p-5 shadow-sm md:p-6">
-            <div className="mb-5 flex items-end justify-between gap-4">
-              <div>
-                <p className="text-xs font-black uppercase tracking-widest text-[#5f8818]">Krok 1</p>
-                <h2 className="mt-1 text-2xl font-black tracking-tight text-gray-950">Wybierz pakiet sprzętu</h2>
-              </div>
-              <p className="hidden text-sm font-semibold text-gray-500 sm:block">Sprzęt dostarczamy za 1 zł</p>
-            </div>
-
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-              {packages.map(p => {
-                const active = selectedPackage === p.id
-                return (
-                  <button
-                    key={p.id}
-                    type="button"
-                    onClick={() => setSelectedPackage(p.id)}
-                    className={`relative rounded-lg border-2 p-4 text-left transition-all ${
-                      active
-                        ? 'border-[#7DB122] bg-[#eef8dd] shadow-sm'
-                        : 'border-gray-200 bg-white hover:border-[#7DB122]/60'
-                    }`}
-                  >
-                    {p.popular && (
-                      <span className="absolute -top-3 left-4 rounded-md bg-[#6f9f1f] px-3 py-1 text-xs font-black uppercase text-white">
-                        Popularny
-                      </span>
-                    )}
-                    <p className="text-lg font-black tracking-tight text-gray-950">{p.name}</p>
-                    <p className="mt-2 text-sm leading-6 text-gray-500">{p.description}</p>
-                    <p className="mt-5 text-3xl font-black text-[#5f8818]">
-                      {p.prices['24']}<span className="text-sm font-bold text-gray-500"> zł/mies.</span>
-                    </p>
-                    <div className="mt-4 space-y-2">
-                      {p.includes.slice(0, 3).map(item => (
-                        <p key={item} className="flex gap-2 text-xs font-semibold text-gray-600">
-                          <span className="text-[#6f9f1f]">✓</span>
-                          {item}
-                        </p>
-                      ))}
-                    </div>
-                  </button>
-                )
-              })}
-            </div>
-          </section>
-
-          <section className="rounded-lg border border-[#102018]/10 bg-white p-5 shadow-sm md:p-6">
-            <p className="text-xs font-black uppercase tracking-widest text-[#5f8818]">Krok 2</p>
-            <h2 className="mt-1 text-2xl font-black tracking-tight text-gray-950">Wybierz konkretny sprzęt</h2>
-            <p className="mt-2 text-sm leading-6 text-gray-500">
-              Na razie cena pakietu jest taka sama niezależnie od modelu. Później możemy przypisać osobne ceny do konkretnych urządzeń.
-            </p>
-
-            <div className="mt-5 space-y-5">
-              {requiredEquipmentCategories.map(category => {
-                const categoryEquipment = liveEquipment.filter(item => item.category === category)
-
-                return (
-                  <div key={category}>
-                    <p className="mb-3 text-sm font-black uppercase tracking-widest text-[#5f8818]">
-                      {equipmentCategoryLabels[category]}
-                    </p>
-                    <div className="grid auto-rows-fr grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                      {categoryEquipment.map(item => {
-                        const active = selectedEquipmentByCategory[category] === item.id
-
-                        return (
-                          <button
-                            key={item.id}
-                            type="button"
-                            onClick={() =>
-                              setSelectedEquipmentByCategory(prev => ({
-                                ...prev,
-                                [category]: item.id,
-                              }))
-                            }
-                            className={`flex h-full min-h-[292px] flex-col overflow-hidden rounded-lg border-2 text-left transition-colors ${
-                              active
-                                ? 'border-[#7DB122] bg-[#eef8dd]'
-                                : 'border-gray-200 bg-white hover:border-[#7DB122]/60'
-                            }`}
-                          >
-                            <div className="relative flex h-40 shrink-0 items-center justify-center bg-white">
-                              <Image
-                                src={item.cardImage}
-                                alt={`${item.brand} ${item.model}`}
-                                fill
-                                sizes="(max-width: 640px) 90vw, (max-width: 1280px) 40vw, 220px"
-                                loading="eager"
-                                unoptimized
-                                className="object-contain p-5"
-                              />
-                            </div>
-                            <div className="flex min-h-[132px] flex-1 flex-col p-4">
-                              <div className="flex items-start justify-between gap-3">
-                                <div className="min-w-0">
-                                  <p className="text-xs font-black uppercase tracking-widest text-[#5f8818]">{item.brand}</p>
-                                  <p className="mt-1 text-lg font-black leading-tight tracking-tight text-gray-950">{item.model}</p>
-                                </div>
-                                <span className={`mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 text-xs font-black ${
-                                  active ? 'border-[#6f9f1f] bg-[#6f9f1f] text-white' : 'border-gray-300 text-transparent'
-                                }`}>
-                                  ✓
-                                </span>
-                              </div>
-                              <p className="mt-auto pt-3 text-xs font-bold text-gray-500">{item.units} szt. dostępne</p>
-                            </div>
-                          </button>
-                        )
-                      })}
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </section>
-
-          <section className="rounded-lg border border-[#102018]/10 bg-white p-5 shadow-sm md:p-6">
-            <p className="text-xs font-black uppercase tracking-widest text-[#5f8818]">Krok 3</p>
-            <h2 className="mt-1 text-2xl font-black tracking-tight text-gray-950">Dobierz dodatkowe wyposażenie</h2>
-            <p className="mt-2 text-sm leading-6 text-gray-500">
-              Opcjonalnie możesz dodać do zestawu biurko albo fotel. Ceny są tymczasowe i będzie można je później łatwo zmienić.
-            </p>
-
-            <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {extraEquipment.map(item => {
-                const active = selectedExtraEquipment.includes(item.id)
-
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => toggleExtraEquipment(item.id)}
-                    className={`flex min-h-[190px] overflow-hidden rounded-lg border-2 text-left transition-colors ${
-                      active
-                        ? 'border-[#7DB122] bg-[#eef8dd]'
-                        : 'border-gray-200 bg-white hover:border-[#7DB122]/60'
-                    }`}
-                  >
-                    <div className="relative hidden w-36 shrink-0 bg-white sm:block">
-                      <Image
-                        src={item.cardImage}
-                        alt={`${item.brand} ${item.model}`}
-                        fill
-                        sizes="144px"
-                        loading="lazy"
-                        unoptimized
-                        className="object-contain p-4"
-                      />
-                    </div>
-                    <div className="flex flex-1 flex-col p-4">
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="text-xs font-black uppercase tracking-widest text-[#5f8818]">{equipmentCategoryLabels[item.category]}</p>
-                          <p className="mt-1 text-lg font-black tracking-tight text-gray-950">{item.brand} {item.model}</p>
-                        </div>
-                        <span className={`mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 text-xs font-black ${
-                          active ? 'border-[#6f9f1f] bg-[#6f9f1f] text-white' : 'border-gray-300 text-transparent'
-                        }`}>
-                          ✓
-                        </span>
-                      </div>
-                      <p className="mt-3 line-clamp-2 text-sm leading-6 text-gray-500">{item.description}</p>
-                      <p className="mt-auto pt-3 text-xl font-black text-[#5f8818]">
-                        +{item.monthlyPrice ?? 0}<span className="text-sm font-bold text-gray-500"> zł/mies.</span>
-                      </p>
-                    </div>
-                  </button>
-                )
-              })}
-            </div>
-          </section>
-
-          <section className="rounded-lg border border-[#102018]/10 bg-white p-5 shadow-sm md:p-6">
-            <p className="text-xs font-black uppercase tracking-widest text-[#5f8818]">Krok 4</p>
-            <h2 className="mt-1 text-2xl font-black tracking-tight text-gray-950">Okres abonamentu</h2>
-            <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
-              {periods.map(p => {
-                const active = selectedPeriod === p.key
-                return (
-                  <button
-                    key={p.key}
-                    type="button"
-                    onClick={() => setSelectedPeriod(p.key)}
-                    className={`rounded-lg border-2 p-4 text-left transition-all ${
-                      active
-                        ? 'border-[#7DB122] bg-[#eef8dd]'
-                        : 'border-gray-200 bg-white hover:border-[#7DB122]/60'
-                    }`}
-                  >
-                    <p className="font-black text-gray-950">{p.label}</p>
-                    <p className="mt-2 text-3xl font-black text-[#5f8818]">
-                      {pkg.prices[p.key]}<span className="text-sm font-bold text-gray-500"> zł</span>
-                    </p>
-                    <p className="mt-1 min-h-5 text-xs font-black text-[#6f9f1f]">{p.discount}</p>
-                  </button>
-                )
-              })}
-            </div>
-          </section>
-
-          <section className="rounded-lg border border-[#102018]/10 bg-white p-5 shadow-sm md:p-6">
-            <p className="text-xs font-black uppercase tracking-widest text-[#5f8818]">Krok 5</p>
-            <h2 className="mt-1 text-2xl font-black tracking-tight text-gray-950">Oprogramowanie i usługi</h2>
-            <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {softwareAddons.map(addon => {
-                const active = selectedAddons.includes(addon.id)
-                return (
-                  <button
-                    key={addon.id}
-                    type="button"
-                    onClick={() => toggleAddon(addon.id)}
-                    className={`rounded-lg border-2 p-4 text-left transition-all ${
-                      active
-                        ? 'border-[#7DB122] bg-[#eef8dd]'
-                        : 'border-gray-200 bg-white hover:border-[#7DB122]/60'
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 text-xs font-black ${
-                            active ? 'border-[#6f9f1f] bg-[#6f9f1f] text-white' : 'border-gray-300 text-transparent'
-                          }`}>
-                            ✓
-                          </span>
-                          <p className="font-black text-gray-950">{addon.name}</p>
-                        </div>
-                        <p className="mt-2 pl-7 text-sm leading-6 text-gray-500">{addon.description}</p>
-                        {addon.recommendedFor && (
-                          <span className="ml-7 mt-3 inline-block rounded-md bg-[#eef8dd] px-2.5 py-1 text-xs font-black text-[#5f8818]">
-                            {addon.recommendedFor}
-                          </span>
-                        )}
-                      </div>
-                      <div className="shrink-0 text-right">
-                        <p className="text-lg font-black text-[#5f8818]">+{addon.price}</p>
-                        <p className="text-xs font-semibold text-gray-400">zł/mies.</p>
-                      </div>
-                    </div>
-                  </button>
-                )
-              })}
-            </div>
-          </section>
-
-          <section className="rounded-lg border border-[#102018]/10 bg-white p-5 shadow-sm md:p-6">
-            <p className="text-xs font-black uppercase tracking-widest text-[#5f8818]">Krok 6</p>
-            <h2 className="mt-1 text-2xl font-black tracking-tight text-gray-950">Opcja wykupu sprzętu</h2>
-            <button
-              type="button"
-              onClick={() => setWithBuyout(!withBuyout)}
-              className={`mt-5 w-full rounded-lg border-2 p-5 text-left transition-all ${
-                withBuyout
-                  ? 'border-[#7DB122] bg-[#eef8dd]'
-                  : 'border-gray-200 bg-white hover:border-[#7DB122]/60'
-              }`}
-            >
-              <div className="flex items-start gap-4">
-                <span className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 text-xs font-black ${
-                  withBuyout ? 'border-[#6f9f1f] bg-[#6f9f1f] text-white' : 'border-gray-300 text-transparent'
-                }`}>
-                  ✓
-                </span>
-                <div>
-                  <p className="font-black text-gray-950">Chcę wykupić sprzęt po zakończeniu abonamentu</p>
-                  <p className="mt-1 text-sm leading-6 text-gray-500">
-                    Koszt wykupu: <strong>{pkg.buyoutPrices[selectedPeriod].toLocaleString('pl-PL')} zł</strong>, rozłożony na raty: <strong>+{buyoutMonthly} zł/mies.</strong>
-                  </p>
-                </div>
-              </div>
-            </button>
-          </section>
+      <main className="mx-auto max-w-6xl px-5 py-14 sm:px-6 lg:py-20">
+        <div className="mb-9 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+          <div>
+            <p className="mb-3 text-sm font-black uppercase tracking-widest text-[#5f8818]">Oferta</p>
+            <h2 className="text-4xl font-black tracking-tight text-gray-950">Dostępne pakiety</h2>
+          </div>
+          <Link
+            href="/konfigurator"
+            className="rounded-md bg-[#6f9f1f] px-6 py-3 text-center text-sm font-black uppercase text-white transition-colors hover:bg-[#5f8818]"
+          >
+            Otwórz konfigurator
+          </Link>
         </div>
 
-        <aside className="lg:sticky lg:top-24 lg:self-start">
-          <div className="overflow-hidden rounded-lg border border-white/12 bg-[#102018] text-white shadow-2xl shadow-[#102018]/15">
-            <div className="border-b border-white/10 p-6">
-              <p className="text-xs font-black uppercase tracking-widest text-[#dff2b8]">Wstępna kalkulacja</p>
-              <p className="mt-4 text-sm font-semibold text-[#f4f9ed]/60">Miesięczna rata</p>
-              <p className="mt-1 text-6xl font-black leading-none text-[#dff2b8]">{totalMonthly}</p>
-              <p className="mt-2 text-sm font-semibold text-[#f4f9ed]/60">zł / miesiąc przez {periodLabel}</p>
-            </div>
-
-            <div className="space-y-3 p-6 text-sm">
-              <div className="flex justify-between gap-4 text-[#f4f9ed]/70">
-                <span>{pkg.name}</span>
-                <span className="font-black text-white">{basePrice} zł</span>
-              </div>
-              <div className="rounded-lg border border-white/10 bg-white/[0.04] p-3">
-                <p className="mb-2 text-xs font-black uppercase tracking-widest text-[#dff2b8]">Wybrany sprzęt</p>
-                <div className="space-y-1.5">
-                  {selectedEquipmentItems.map(item => (
-                    <div key={item.id} className="flex justify-between gap-4 text-[#f4f9ed]/70">
-                      <span>{equipmentCategoryLabels[item.category]}</span>
-                      <span className="text-right font-black text-white">{item.brand} {item.model}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              {selectedExtraEquipmentItems.length > 0 && (
-                <div className="rounded-lg border border-white/10 bg-white/[0.04] p-3">
-                  <p className="mb-2 text-xs font-black uppercase tracking-widest text-[#dff2b8]">Dodatkowe wyposażenie</p>
-                  <div className="space-y-1.5">
-                    {selectedExtraEquipmentItems.map(item => (
-                      <div key={item.id} className="flex justify-between gap-4 text-[#f4f9ed]/70">
-                        <span>{item.brand} {item.model}</span>
-                        <span className="font-black text-white">+{item.monthlyPrice ?? 0} zł</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+          {packages.map(pkg => (
+            <article
+              key={pkg.id}
+              className={`flex min-h-full flex-col rounded-lg border p-6 shadow-sm ${
+                pkg.popular
+                  ? 'border-[#7DB122] bg-[#102018] text-white shadow-[#102018]/10'
+                  : 'border-[#102018]/10 bg-white text-gray-950'
+              }`}
+            >
+              {pkg.popular && (
+                <p className="mb-3 w-fit rounded-md bg-[#7DB122]/20 px-3 py-1 text-xs font-black uppercase tracking-wider text-[#dff2b8]">
+                  Najczęstszy wybór
+                </p>
               )}
-              {selectedAddonItems.map(addon => (
-                <div key={addon.id} className="flex justify-between gap-4 text-[#f4f9ed]/70">
-                  <span>{addon.name}</span>
-                  <span className="font-black text-white">+{addon.price} zł</span>
-                </div>
-              ))}
-              {withBuyout && (
-                <div className="flex justify-between gap-4 text-[#f4f9ed]/70">
-                  <span>Wykup sprzętu</span>
-                  <span className="font-black text-white">+{buyoutMonthly} zł</span>
-                </div>
-              )}
-              <div className="border-t border-white/10 pt-3">
-                <div className="flex justify-between gap-4 font-black">
-                  <span>Suma za {selectedPeriod} mies.</span>
-                  <span className="text-[#dff2b8]">{totalContract.toLocaleString('pl-PL')} zł</span>
-                </div>
-              </div>
-            </div>
+              <h3 className="text-2xl font-black tracking-tight">{pkg.name}</h3>
+              <p className={`mt-3 text-sm leading-6 ${pkg.popular ? 'text-[#f4f9ed]/70' : 'text-gray-600'}`}>
+                {pkg.description}
+              </p>
 
-            <div className="px-6 pb-6">
-              <div className="mb-4 rounded-lg border border-[#7DB122]/25 bg-[#7DB122]/10 p-4 text-center">
-                <p className="font-black text-[#dff2b8]">Sprzęt dostarczamy za 1 zł</p>
-                <p className="mt-1 text-xs font-semibold text-[#f4f9ed]/55">Dostawa i konfiguracja w cenie</p>
-              </div>
-              <div className="mb-4 rounded-lg border border-white/10 bg-white/[0.04] p-4">
-                <p className="font-black text-white">To jeszcze nie jest zamówienie.</p>
-                <p className="mt-1 text-xs font-semibold leading-5 text-[#f4f9ed]/55">
-                  Wyślesz zapytanie z wybraną konfiguracją. Po rozmowie możesz ją zmienić albo zrezygnować bez zobowiązań.
+              <div className="mt-6">
+                <p className={`text-sm font-bold ${pkg.popular ? 'text-[#f4f9ed]/60' : 'text-gray-500'}`}>Od</p>
+                <p className="text-5xl font-black tracking-tight">
+                  {pkg.prices['24']}
+                  <span className={`text-base font-bold ${pkg.popular ? 'text-[#f4f9ed]/60' : 'text-gray-500'}`}> zł/mies.</span>
                 </p>
               </div>
+
+              <ul className="mt-6 flex-1 space-y-3 text-sm font-semibold">
+                {pkg.includes.slice(0, 5).map(item => (
+                  <li key={item} className="flex gap-2">
+                    <span className="text-[#7DB122]">✓</span>
+                    <span className={pkg.popular ? 'text-[#f4f9ed]/80' : 'text-gray-700'}>{item}</span>
+                  </li>
+                ))}
+              </ul>
+
               <Link
-                href={`/kontakt?${contactQuery.toString()}`}
-                className="block rounded-md bg-[#6f9f1f] px-6 py-4 text-center text-base font-black text-white transition-colors hover:bg-[#5f8818]"
+                href={`/konfigurator?package=${pkg.id}`}
+                className={`mt-7 rounded-md px-5 py-3 text-center text-sm font-black uppercase transition-colors ${
+                  pkg.popular
+                    ? 'bg-[#6f9f1f] text-white hover:bg-[#5f8818]'
+                    : 'bg-[#eef8dd] text-[#4f7414] hover:bg-[#dff2b8]'
+                }`}
               >
-                Poproś o ofertę bez zobowiązań
+                Skonfiguruj ten pakiet
               </Link>
-              <p className="mt-3 text-center text-xs font-semibold text-[#f4f9ed]/50">Odpowiadamy w ciągu 24 godzin</p>
+            </article>
+          ))}
+        </div>
+
+        <section className="mt-10 rounded-lg border border-[#102018]/10 bg-white p-6 shadow-sm md:p-8">
+          <div className="grid gap-6 lg:grid-cols-[1fr_280px] lg:items-center">
+            <div>
+              <p className="text-xs font-black uppercase tracking-widest text-[#5f8818]">Co dalej?</p>
+              <h2 className="mt-2 text-3xl font-black tracking-tight text-gray-950">
+                Finalna cena zależy od sprzętu, okresu i dodatków.
+              </h2>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-gray-600">
+                Dlatego pakiety są opisem bazowym. W konfiguratorze wybierzesz konkretny model, dodatkowe wyposażenie oraz usługi, a formularz wyśle do nas gotowe podsumowanie.
+              </p>
             </div>
+            <Link
+              href="/konfigurator"
+              className="rounded-md border border-[#102018]/15 bg-white px-6 py-4 text-center text-sm font-black uppercase text-gray-950 transition-colors hover:border-[#7DB122]/60 hover:text-[#5f8818]"
+            >
+              Przejdź do konfiguratora
+            </Link>
           </div>
-        </aside>
-      </div>
+        </section>
+      </main>
     </div>
   )
 }

@@ -96,7 +96,7 @@ export default async function PanelKlientaPage() {
 
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-2xl font-black tracking-tight text-gray-950">Historia zapytań</h2>
-          <Link href="/pakiety" className="rounded-md bg-[#6f9f1f] px-5 py-2.5 text-sm font-black uppercase text-white transition-colors hover:bg-[#5f8818]">
+          <Link href="/konfigurator" className="rounded-md bg-[#6f9f1f] px-5 py-2.5 text-sm font-black uppercase text-white transition-colors hover:bg-[#5f8818]">
             Nowe zapytanie
           </Link>
         </div>
@@ -114,7 +114,7 @@ export default async function PanelKlientaPage() {
               </p>
             </div>
             <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
-              <Link href="/pakiety" className="rounded-md bg-[#6f9f1f] px-6 py-3 text-sm font-black uppercase text-white transition-colors hover:bg-[#5f8818]">
+              <Link href="/konfigurator" className="rounded-md bg-[#6f9f1f] px-6 py-3 text-sm font-black uppercase text-white transition-colors hover:bg-[#5f8818]">
                 Przejdź do konfiguratora
               </Link>
               <Link href="/kontakt" className="rounded-md border border-[#102018]/15 bg-white px-6 py-3 text-sm font-black uppercase text-gray-950 transition-colors hover:border-[#7DB122]/60 hover:text-[#5f8818]">
