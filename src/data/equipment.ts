@@ -9,6 +9,9 @@ export interface Equipment {
   cardSpecs?: { label: string; value: string }[]
   monthlyPrice?: number
   units: number
+  stockSource?: 'seed' | 'sheet' | 'manual'
+  stockSyncedAt?: string
+  active?: boolean
   description: string
 }
 

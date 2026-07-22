@@ -27,6 +27,43 @@ enum Role {
   ADMIN
 }
 
+enum EquipmentCategory {
+  laptop
+  pc
+  monitor
+  biurko
+  fotel
+}
+
+enum EquipmentStockSource {
+  seed
+  sheet
+  manual
+}
+
+// Sprzęt dostępny w ofercie wynajmu
+model Equipment {
+  id           String            @id
+  category     EquipmentCategory
+  brand        String
+  model        String
+  image        String
+  cardImage    String
+  specs        Json
+  cardSpecs    Json?
+  monthlyPrice Int?
+  units        Int               @default(0)
+  stockSource  EquipmentStockSource @default(seed)
+  stockSyncedAt DateTime?
+  description  String
+  active       Boolean           @default(true)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  @@index([category])
+  @@index([active])
+}
+
 // Zapytanie z konfiguratora / formularza kontaktowego
 model Inquiry {
   id           String   @id @default(cuid())
